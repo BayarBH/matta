@@ -6,7 +6,9 @@
 **架空のデモです。実在の銀行・警察とは関係ありません。** 登場する銀行「デモ銀行（架空）」、警察「青嶺県警察（架空）」、人物はすべて架空です。
 
 - デモURL: https://matta-web-760253059957.asia-east1.run.app
+- デモ動画（約3分）: 〔YouTube URL〕
 - 審査用テストアカウント: 応募フォームの「動作確認の方法」に記載しています（このREADMEには載せていません）。
+- 評価結果: [`docs/EVAL.md`](docs/EVAL.md)／設計判断の記録: [`docs/DECISIONS.md`](docs/DECISIONS.md)
 
 ---
 
@@ -78,6 +80,18 @@
 - **データ**：Firestore。アプリ用 `(default)` と銀行用 `bank` を分け、IAM条件で `sa-web` は `(default)` だけ、`sa-bank` は `bank` だけにアクセスできます。
 - **リージョン**：Cloud Run は asia-east1、Firestore・Cloud Tasks・Artifact Registry は asia-northeast1（asia-northeast1 で Cloud Run のプロジェクト初期化が通らなかったため。`docs/DECISIONS.md` 参照）。
 
+## リポジトリ構成
+
+```
+apps/web/          Next.js（顧客アプリ・見守りルール・見守り人の受信箱・デモコンソール・ブラックボックス・運営画面、AIガーディアン、読み取りAI）
+apps/demo-bank/    Express（架空の銀行：台帳、振込と保留、見守り契約、決定論的リリース判定、デモ時計、監査）※LLMなし
+packages/core/     純粋なTypeScript：zodスキーマ、契約の締める／ゆるめる判定、振込判定、リリース条件、キーワード事前チェック、メッセージガード
+policy/            system-policy.yaml（理由コード、エスカレーション閾値、ガーディアンの上限、メッセージガード）
+scripts/           check-models / seed / smoke / eval / scenarios:validate
+infra/             setup.sh（API・サービスアカウント・IAM・Firestore・Cloud Tasks・Secret Manager）、deploy.sh、cloudbuild.yaml
+docs/              SPEC、DECISIONS、EVAL、DEMO_SCRIPT、SUBMISSION、architecture.png
+```
+
 ## ガバナンス設計
 
 | 原則 | 実装 |
@@ -96,7 +110,7 @@
 
 ## 評価結果
 
-詳細は [`docs/EVAL.md`](docs/EVAL.md) を参照してください。
+デプロイ済みのサービスに対して、14件×2セットの台本シナリオ（詐欺・言い含められた詐欺・ルール緩和攻撃・正当な振込）を自動シミュレーションで実行しました。セットBはチューニング前に作成し、チューニングにはセットAだけを使っています。詳細は [`docs/EVAL.md`](docs/EVAL.md) を参照してください。
 
 | 指標 | 結果 |
 |---|---|
@@ -108,13 +122,17 @@
 | 正当な振込の誤エスカレーション率 | **0%** |
 | 1件あたり推定コスト／ガーディアン応答時間 p50・p95 | 約 ¥0.8／1.8秒・10.0秒 |
 
+単体テスト：packages/core 87件、demo-bank 38件（認可・なりすまし27件を含む）、web 21件（フェイルセーフ・ガバナンスの静的検査を含む）。
+
 ## 制限事項
 
 - 銀行は架空の「デモ銀行（架空）」で、実在の銀行APIには接続していません。実運用では銀行のAPIに置き換える前提です。
 - 詐欺のシナリオは台本です。音声や実際の通話の信号は扱いません。
 - 評価は台本シナリオによるもので、実際の被害者の行動を代表するものではありません。
 - 見守り人の応答時間は仮定値で評価しています（EVAL.md参照）。
-- AIガーディアンの1ステップは数秒〜20秒程度かかります。タイムアウト時は安全側（見守り人の承認が必要）に倒れます。
+- AIガーディアンの判断は完全ではありません。落ち着いた作り話を繰り返す「言い含められた」投資詐欺のシナリオは、評価で見逃しが残りました（保留帯の詐欺の再現率 83.3%）。ただし、ルールで見守り人に回った振込が承認なしに出金されることはありません。
+- AIガーディアンのモデル呼び出しは p50 約2秒、p95 約10秒です。タイムアウト時は安全側（見守り人の承認が必要）に倒れます。
+- レッドチームの台本（詐欺のセリフ）は悪用を避けるため公開リポジトリに含めていません。評価は台本ファイルのハッシュで特定しています。
 - 通知はアプリ内のみです（SMS・メールは送りません）。
 
 ## 今後の展開
@@ -140,9 +158,10 @@ pnpm check:models            # モデルが使えるか確認（Gemini 2.5 は�
 pnpm seed                    # テストユーザーとサンドボックスを作成
 pnpm dev                     # web :3000 / bank :8081
 pnpm typecheck && pnpm test
-pnpm scenarios:validate
+pnpm scenarios:validate      # scenarios/{A,B}/*.json を検証（台本は非公開のため、リポジトリには含まれません）
+pnpm eval --target cloud     # 全シナリオをデプロイ先で実行し eval/results.json を出力
 ```
 
 - ローカルでは `TASKS_MODE=inline`、`S2S_DEV_INSECURE=true`（本番では無効）、`DEMO_MODE=true` を使います。
 - Firebase：プロジェクトにFirebaseを追加し、メール／パスワード認証を有効化し、Webアプリを登録します（コンソール、または `docs/DECISIONS.md` にある REST API の手順）。
-- クラウド：`bash infra/setup.sh`（API、サービスアカウント、IAM、Firestore、Cloud Tasks、Secret Manager）→ `pnpm deploy:all` → `pnpm smoke`。詳細は `infra/README.md`。
+- クラウド：Cloud Run のリージョンは `RUN_REGION`（既定 asia-east1）で切り替えられます。`bash infra/setup.sh`（API、サービスアカウント、IAM、Firestore、Cloud Tasks、Secret Manager）→ `pnpm deploy:all` → `pnpm smoke`。詳細は `infra/README.md`。
