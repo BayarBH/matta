@@ -7,3 +7,8 @@ dist/
 coverage/
 .DS_Store
 next-env.d.ts
+
+# Red-team scripts stay out of the (future public) repo until decided; .gcloudignore still uploads them for the image.
+scenarios/A/
+scenarios/B/
+scenarios/SOURCES.md

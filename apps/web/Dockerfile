@@ -11,6 +11,9 @@ RUN pnpm install --frozen-lockfile --filter . --filter @matta/web...
 
 COPY packages/core packages/core
 COPY apps/web apps/web
+# Runtime data read relative to apps/web (cwd): ../../policy and ../../scenarios.
+COPY policy policy
+COPY scenarios scenarios
 
 # NEXT_PUBLIC_* are inlined at build time.
 ARG NEXT_PUBLIC_FIREBASE_API_KEY
