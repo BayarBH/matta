@@ -64,6 +64,11 @@ await check('web → bank with a real Google ID token (caller = sa-web)', async 
   const c = j.bank?.caller;
   return c?.kind === 'service' && c.email.startsWith('sa-web@') ? true : `${r.status} ${JSON.stringify(j)}`;
 });
+await check('web (sa-web) cannot read the bank database', async () => {
+  const r = await fetch(`${WEB_URL}/api/debug/bank`, { headers: { authorization: `Bearer ${tokens.operator}` } });
+  const j = (await r.json()) as { webReadingBankDb?: string };
+  return j.webReadingBankDb === 'denied' ? true : `webReadingBankDb=${j.webReadingBankDb}`;
+});
 await check('customer-1 GET bank /v1/me', async () => {
   const r = await fetch(`${BANK_URL}/v1/me`, { headers: { 'x-user-token': tokens['customer-1'] ?? '' } });
   const j = (await r.json()) as { role?: string };
