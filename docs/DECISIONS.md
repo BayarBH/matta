@@ -46,3 +46,12 @@ Email/password sign-in enabled and a dedicated web app `matta-web` registered th
 - Reader failure → flag `guardian_unavailable` with severity **elevated** (policy lists it as high for the guardian). Reason: rule 9 says everyday transfers keep flowing; an elevated flag still blocks R-EVERYDAY-NEW, so a new payee can't clear, while registered rent still settles. Guardian failures on checked transfers still escalate with `guardian_unavailable`.
 - Guardian step latency is 9–22 s with MODEL_SMART=gemini-3.8-flash, close to the 20 s timeout. Timeouts fail safe; tune in Phase 4.
 - Known gap: bank sandbox reset does not clear web `conversations`/`contactNotices` (keyed by old transfer ids, so invisible). The Phase 3 `/demo` reset clears both.
+
+## 2026-10-13 — Cloud Run region fallback: asia-east1
+Cloud Run in asia-northeast1 fails with `ProjectInitFailedQuotaExceeded` (project-level regional init; all quotas at defaults; 4×4 retries over ~20 min). The user approved the fallback. Cloud Run services run in **asia-east1** (`RUN_REGION`); Firestore (`(default)`, `bank`), the Cloud Tasks queue and Artifact Registry stay in asia-northeast1. The hackathon requires Cloud Run, not a region. A failed `matta-bank` service stub remains in asia-northeast1 (no traffic); delete only with the user's OK. Revisit by redeploying with `RUN_REGION=asia-northeast1` if the block lifts.
+
+## 2026-10-13 — Red-team scripts stay out of the public repo
+`scenarios/A`, `scenarios/B` and `scenarios/SOURCES.md` are gitignored (rule 11; the repo becomes public after the deadline). `.gcloudignore` does not include `.gitignore`, so the files are still uploaded and baked into the web image. Back them up outside git.
+
+## 2026-10-13 — Demo autopilot lives in apps/web under a narrow exemption
+SPEC §10 has autopilots act with the sandbox's own identities. `lib/scenario` mints those tokens (custom token via sa-web; dev falls back to seed passwords), refuses unless DEMO_MODE, and a test forbids it from importing the guardian, reader or Gemini. The governance static test exempts only that directory.
