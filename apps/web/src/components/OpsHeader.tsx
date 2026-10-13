@@ -77,7 +77,7 @@ export function OpsHeader() {
         <Stat label="AIによるエスカレーション" value={`${g.escalations}件`} />
         <Stat label="AIエラー率（直近20回）" value={g.errorRate === null ? '—' : `${Math.round(g.errorRate * 100)}%`} />
         <Stat label="AI応答時間（中央値）" value={g.medianLatencyMs === null ? '—' : `${Math.round(g.medianLatencyMs)}ms`} />
-        <Stat label="確認1件あたりの推定費用" value={g.estCostPerGuardedJpy === null ? 'Phase 4で算出' : `約${g.estCostPerGuardedJpy.toFixed(2)}円`} />
+        <Stat label="確認1件あたりの推定費用" value={g.estCostPerGuardedJpy === null ? '—' : `約${g.estCostPerGuardedJpy.toFixed(2)}円`} />
       </div>
     </section>
   );

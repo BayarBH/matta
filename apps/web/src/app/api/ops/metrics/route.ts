@@ -37,14 +37,16 @@ export async function GET(req: Request) {
     // ponytail: full collection scans; fine at demo scale (3 sandboxes), aggregate counters if it grows.
     const [convSnap, auditSnap, cfgDoc] = await Promise.all([
       db().collection('conversations').get(),
-      db().collection('auditEvents').where('actor', '==', 'guardian').get(),
+      db().collection('auditEvents').where('actor', 'in', ['guardian', 'reader']).get(),
       db().collection('config').doc('guardian').get(),
     ]);
     const convs = convSnap.docs.map((d) => Conversation.parse(d.data()));
-    const guardianEvents = auditSnap.docs.map((d) => AuditEvent.parse(d.data()));
+    const llmEvents = auditSnap.docs.map((d) => AuditEvent.parse(d.data()));
+    const guardianEvents = llmEvents.filter((e) => e.actor === 'guardian');
     const cfg = GuardianConfig.parse(cfgDoc.data() ?? {});
     const recent = cfg.recent.slice(-20); // true = the call errored
-    const costs = guardianEvents.map((e) => e.estCostJpy).filter((x): x is number => x !== undefined);
+    // Cost per guarded transfer = guardian + reader LLM spend / guarded transfers (estimate, config/pricing.ts).
+    const costs = llmEvents.map((e) => e.estCostJpy).filter((x): x is number => x !== undefined);
 
     return NextResponse.json({
       bank,

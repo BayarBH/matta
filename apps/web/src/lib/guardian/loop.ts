@@ -11,6 +11,7 @@ import {
 } from '@matta/core';
 import { TOOL_ARGS, AUTO_NOTICE_JA, FAIL_SAFE_JA, RESOURCE_JA, type ToolName } from './tools';
 import type { Breaker, Conversation, ConversationView, GuardianStore } from './state';
+import { estCostJpy } from '../../config/pricing';
 
 /** One model response, reduced to what the loop needs (keeps tests free of the SDK). */
 export type ModelReply = { content: Content | undefined; functionCalls: FunctionCall[]; tokensIn: number; tokensOut: number };
@@ -107,7 +108,7 @@ export async function runStep(deps: Deps, caller: Caller, transferId: string, cu
         await deps.audit({ ...base, actor: 'guardian', action: 'guardian.model_call', model: deps.modelName, latencyMs: Date.now() - started, outcome: 'error', detailsJa: `AIの呼び出しに失敗しました（${String(e).slice(0, 60)}）` });
         throw e;
       }
-      await deps.audit({ ...base, actor: 'guardian', action: 'guardian.model_call', model: deps.modelName, tokensIn: reply.tokensIn, tokensOut: reply.tokensOut, latencyMs: Date.now() - started, outcome: 'ok', detailsJa: `AIが ${reply.functionCalls.map((c) => c.name).join(', ') || '（なし）'} を選びました` });
+      await deps.audit({ ...base, actor: 'guardian', action: 'guardian.model_call', model: deps.modelName, tokensIn: reply.tokensIn, tokensOut: reply.tokensOut, estCostJpy: estCostJpy(deps.modelName, reply.tokensIn, reply.tokensOut), latencyMs: Date.now() - started, outcome: 'ok', detailsJa: `AIが ${reply.functionCalls.map((c) => c.name).join(', ') || '（なし）'} を選びました` });
       if (!reply.content || reply.functionCalls.length === 0) {
         await recordCall(deps, true, breaker, probing);
         throw new Error('invalid model output: no tool call');

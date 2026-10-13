@@ -7,5 +7,6 @@ import { log } from './log';
 export async function writeAudit(e: Omit<AuditEvent, 'id' | 'ts' | 'service'>): Promise<void> {
   const ev = AuditEvent.parse({ ...e, id: randomUUID(), ts: new Date().toISOString(), service: 'web' });
   log('INFO', `audit ${ev.action}`, { audit: ev });
-  await db().collection('auditEvents').doc(ev.id).set(ev);
+  // Firestore rejects `undefined` fields (e.g. estCostJpy for an unpriced model): drop them.
+  await db().collection('auditEvents').doc(ev.id).set(JSON.parse(JSON.stringify(ev)));
 }

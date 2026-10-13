@@ -7,6 +7,7 @@ import { policy } from './policy.server';
 import { db } from './firebase.admin';
 import { writeAudit } from './audit';
 import { log } from './log';
+import { estCostJpy } from '../config/pricing';
 
 /** Bump when the prompt or schema changes; it is part of the cache key. */
 export const READER_PROMPT_VERSION = 'reader-v1';
@@ -72,7 +73,14 @@ export async function readFields(fields: { payeeName: string; memo: string }, ct
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
       const r = await callModel(fields, repair);
-      const parsed = ReaderOut.safeParse(JSON.parse(r.text));
+      // Parse leniently so a non-JSON reply is still audited (tokens + cost) before the repair retry.
+      let json: unknown;
+      try {
+        json = JSON.parse(r.text);
+      } catch {
+        json = undefined;
+      }
+      const parsed = ReaderOut.safeParse(json);
       await writeAudit({
         sandboxId: ctx.sandboxId,
         actor: 'reader',
@@ -83,6 +91,7 @@ export async function readFields(fields: { payeeName: string; memo: string }, ct
         model: env().MODEL_FAST,
         tokensIn: r.tokensIn,
         tokensOut: r.tokensOut,
+        estCostJpy: estCostJpy(env().MODEL_FAST, r.tokensIn, r.tokensOut),
         latencyMs: r.latencyMs,
         outcome: parsed.success ? 'ok' : 'error',
         detailsJa: parsed.success
