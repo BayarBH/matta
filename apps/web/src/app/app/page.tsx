@@ -7,6 +7,7 @@ import { bankFetch, errorJa, post, webFetch } from '@/lib/bankClient';
 import { Nav } from '@/components/Nav';
 import { TransferFacts, yen } from '@/components/TransferFacts';
 import { DemoClock } from '@/components/DemoClock';
+import { GuardianChat } from '@/components/GuardianChat';
 
 const KIND_JA = { new: '新しい振込先', registered: '登録済みの振込先', verified: '銀行確認済みの振込先' } as const;
 const input = 'mt-1 w-full rounded border border-stone-300 px-3 py-2 tabular-nums';
@@ -77,6 +78,13 @@ function TransferForm({ onDone }: { onDone: () => void }) {
   const [result, setResult] = useState<Transfer | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const resultId = result?.id;
+  // Guardian may escalate: re-read the trusted facts from the bank after each guardian step.
+  const reload = useCallback(async () => {
+    if (resultId) setResult(await webFetch(`/api/bank/transfers/${resultId}`, {}, Transfer).catch(() => null));
+    onDone();
+  }, [resultId, onDone]);
 
   const setField = (k: keyof typeof acct) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setAcct({ ...acct, [k]: e.target.value.replace(/\D/g, '') });
@@ -159,24 +167,18 @@ function TransferForm({ onDone }: { onDone: () => void }) {
           {busy ? '送信中…' : '振り込む'}
         </button>
       </form>
-      {result && <TransferFacts t={result} />}
+      {result && (
+        <div className="grid gap-3 md:grid-cols-2">
+          <TransferFacts t={result} />
+          <GuardianChat t={result} onChange={reload} />
+        </div>
+      )}
     </section>
   );
 }
 
 function TransferRow({ t, onChange }: { t: Transfer; onChange: () => void }) {
   const [open, setOpen] = useState(false);
-  const [msg, setMsg] = useState<string | null>(null);
-
-  async function act(path: 'cancel' | 'request-early-approval', done: string) {
-    try {
-      await bankFetch(`/v1/transfers/${t.id}/${path}`, post(), Transfer);
-      setMsg(done);
-      onChange();
-    } catch (e) {
-      setMsg(errorJa(e));
-    }
-  }
 
   return (
     <div className="rounded-lg border border-stone-200 bg-white">
@@ -188,24 +190,11 @@ function TransferRow({ t, onChange }: { t: Transfer; onChange: () => void }) {
       </button>
       {open && (
         <div className="space-y-2 border-t border-stone-100 p-3">
-          <TransferFacts t={t} />
-          <div className="flex flex-wrap gap-2 text-sm">
-            {(t.status === 'held' || t.status === 'contact_required') && (
-              <button onClick={() => act('cancel', '取り消しました。')} className="rounded border border-stone-300 px-3 py-1.5 hover:bg-stone-100">
-                取り消す
-              </button>
-            )}
-            {t.status === 'held' && !t.earlyApprovalRequestedAt && (
-              <button
-                onClick={() => act('request-early-approval', '見守り人にお知らせしました。')}
-                className="rounded border border-teal-700 px-3 py-1.5 text-teal-800 hover:bg-teal-50"
-              >
-                見守り人に早めの承認を依頼する
-              </button>
-            )}
-            {t.earlyApprovalRequestedAt && <span className="py-1.5 text-stone-500">見守り人に早めの承認を依頼済みです。</span>}
+          <div className="grid gap-3 md:grid-cols-2">
+            <TransferFacts t={t} />
+            <GuardianChat t={t} onChange={onChange} />
           </div>
-          {msg && <p className="text-sm text-stone-600">{msg}</p>}
+          {t.earlyApprovalRequestedAt && <p className="text-sm text-stone-500">見守り人に早めの承認を依頼済みです。</p>}
         </div>
       )}
     </div>

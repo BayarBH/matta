@@ -2,20 +2,30 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ContactInbox, ContactTransferView, formatJst, MandateChange } from '@matta/core';
 import { useSession } from '@/lib/session';
-import { bankFetch, errorJa, post } from '@/lib/bankClient';
-import { FIELD_JA } from '@/lib/reasonCodes';
+import { z } from 'zod';
+import { bankFetch, errorJa, post, webFetch } from '@/lib/bankClient';
+import { FIELD_JA, REASON_JA } from '@/lib/reasonCodes';
 import { Nav } from '@/components/Nav';
 import { TransferFacts } from '@/components/TransferFacts';
+
+const Notice = z.object({ id: z.string(), transferId: z.string(), summaryJa: z.string(), reasonCodes: z.array(z.string()), createdAt: z.string() });
+type Notice = z.infer<typeof Notice>;
 
 /** Trusted contact's inbox. Decisions go from this browser straight to the bank (never through the web server). */
 export default function ContactPage() {
   const session = useSession(['contact']);
   const [inbox, setInbox] = useState<ContactInbox | null>(null);
+  const [notices, setNotices] = useState<Notice[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     try {
-      setInbox(await bankFetch('/v1/contact/inbox', {}, ContactInbox));
+      const [ib, ns] = await Promise.all([
+        bankFetch('/v1/contact/inbox', {}, ContactInbox),
+        webFetch('/api/contact/notices', {}, z.object({ notices: z.array(Notice) })).catch(() => ({ notices: [] })),
+      ]);
+      setInbox(ib);
+      setNotices(ns.notices);
       setError(null);
     } catch (e) {
       setError(errorJa(e));
@@ -55,6 +65,7 @@ export default function ContactPage() {
               )}
               <p className="text-xs text-stone-500">{heldFor(t)}</p>
               <TransferFacts t={t} />
+              <GuardianNotices notices={notices.filter((n) => n.transferId === t.id)} />
               <Decision
                 approveLabel="承認する"
                 onDecide={(decision, reasonJa) =>
@@ -93,6 +104,27 @@ export default function ContactPage() {
         </section>
       </div>
     </>
+  );
+}
+
+/** Guardian's guarded summary + reason codes in plain Japanese. No transcript, no balance. */
+function GuardianNotices({ notices }: { notices: Notice[] }) {
+  if (notices.length === 0) return null;
+  const codes = [...new Set(notices.flatMap((n) => n.reasonCodes))];
+  return (
+    <div className="space-y-2 rounded-lg border border-indigo-200 bg-indigo-50/60 p-3 text-sm">
+      <p className="font-medium text-indigo-950">AIガーディアン（マッタ）からのお知らせ</p>
+      {[...new Set(notices.map((n) => n.summaryJa))].map((s) => (
+        <p key={s}>{s}</p>
+      ))}
+      {codes.length > 0 && (
+        <ul className="list-disc pl-5 text-indigo-950">
+          {codes.map((c) => (
+            <li key={c}>{REASON_JA[c as keyof typeof REASON_JA] ?? c}</li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }
 

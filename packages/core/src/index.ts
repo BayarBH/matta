@@ -4,3 +4,4 @@ export * from './mandate';
 export * from './evaluate';
 export * from './policy';
 export * from './api';
+export * from './guard';

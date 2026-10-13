@@ -39,3 +39,10 @@ Email/password sign-in enabled and a dedicated web app `matta-web` registered th
 - Firestore separation: `roles/datastore.user` with IAM condition `resource.name=="projects/P/databases/<db>"` (syntax from the Firestore manage-databases docs; the `(default)` form is inferred from the resource-name format). Fallback: drop the condition and record it here.
 - Demo passwords live in Secret Manager as the source of truth; no service reads them at runtime, so no accessor bindings yet.
 - Bank runs TS via tsx in the container (`--prod` install; tsx is a runtime dependency).
+
+## 2026-10-13 — Phase 2 guardian
+- The guardian model must call a tool on every turn (no free text reaches users); customer answers go back inside the `ask_customer` function response. The model never sees payee names or memos, only reader flag codes.
+- Escalation is computed by code (`shouldEscalate`) after `record_assessment`; the only bank write reachable from the web is `escalate` (held → contact_required).
+- Reader failure → flag `guardian_unavailable` with severity **elevated** (policy lists it as high for the guardian). Reason: rule 9 says everyday transfers keep flowing; an elevated flag still blocks R-EVERYDAY-NEW, so a new payee can't clear, while registered rent still settles. Guardian failures on checked transfers still escalate with `guardian_unavailable`.
+- Guardian step latency is 9–22 s with MODEL_SMART=gemini-3.8-flash, close to the 20 s timeout. Timeouts fail safe; tune in Phase 4.
+- Known gap: bank sandbox reset does not clear web `conversations`/`contactNotices` (keyed by old transfer ids, so invisible). The Phase 3 `/demo` reset clears both.
