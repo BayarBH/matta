@@ -1,5 +1,5 @@
 // Verifies MODEL_FAST / MODEL_SMART exist on Vertex AI for this project and are not Gemini 2.5.
-// Usage: pnpm check:models [--ping]
+// Usage: pnpm check:models  (always pings: models.get can PASS for models the project cannot call)
 import { GoogleGenAI } from '@google/genai';
 import { z } from 'zod';
 import { modelId, parseEnv } from '@matta/core';
@@ -14,7 +14,6 @@ const env = parseEnv(
 );
 
 const ai = new GoogleGenAI({ vertexai: true, project: env.GOOGLE_CLOUD_PROJECT, location: env.GOOGLE_CLOUD_LOCATION });
-const ping = process.argv.includes('--ping');
 
 console.log(`project=${env.GOOGLE_CLOUD_PROJECT} location=${env.GOOGLE_CLOUD_LOCATION}`);
 
@@ -39,7 +38,7 @@ for (const [key, id] of [['MODEL_FAST', env.MODEL_FAST], ['MODEL_SMART', env.MOD
   } catch (e) {
     problems.push(`not available: ${String(e).slice(0, 200)}`);
   }
-  if (ping && problems.length === 0) {
+  if (problems.length === 0) {
     try {
       await ai.models.generateContent({ model: id, contents: 'ping', config: { maxOutputTokens: 1 } });
     } catch (e) {

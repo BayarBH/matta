@@ -15,3 +15,6 @@ Tradeoffs and why. Newest at the bottom.
 
 ## 2026-10-13 — Local web database is `web-dev`, not `dev`
 Firestore database IDs need 4–63 characters, so `dev` is rejected. Local databases: `web-dev` (web) and `bank-dev` (bank), both asia-northeast1. Docs updated.
+
+## 2026-10-13 — Models: MODEL_FAST=gemini-3.5-flash-lite, MODEL_SMART=gemini-3.8-flash
+Chosen from what Vertex (location `global`) lists for this project, non-preview only so they outlive the judging window. `gemini-3-flash` does not exist; `gemini-3-pro` passes `models.get` but 404s on `generateContent`, so `check:models` now always runs a 1-token generation ping. A flash model for the guardian keeps conversation latency low for the live demo; revisit a Pro model only if Phase 2 judgment is weak.
