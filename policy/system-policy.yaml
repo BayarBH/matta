@@ -1,0 +1,29 @@
+version: 1
+reason_codes:
+  authority_claim:            { severity: high,     ja: 警察・役所・銀行などを名乗る相手からの指示の可能性 }
+  secrecy_requested:          { severity: high,     ja: 口外しないよう言われている可能性 }
+  safe_account:               { severity: high,     ja: 「保護口座」などへの移動の可能性 }
+  disable_protection_request: { severity: high,     ja: 見守り設定の解除を求められている可能性 }
+  on_call_with_instructor:    { severity: high,     ja: 電話で指示を受けながら操作している可能性 }
+  guaranteed_returns:         { severity: high,     ja: 元本保証・高利回りの勧誘 }
+  payee_name_flag:            { severity: high,     ja: 受取人名義に公的機関・保護を思わせる語 }
+  guardian_unavailable:       { severity: high,     ja: AIによる確認を完了できなかったため、念のため確認が必要 }
+  urgency:                    { severity: elevated, ja: 急がされている }
+  crypto_or_gold:             { severity: elevated, ja: 暗号資産・金地金の購入 }
+  coached_answers:            { severity: elevated, ja: 説明が誰かに用意されている可能性 }
+  inconsistent_story:         { severity: elevated, ja: 送金目的と受取人が一致しない }
+  instructions_to_ai:         { severity: elevated, ja: AI宛ての指示を含む }
+escalation:
+  any_high: true
+  elevated_count_at_least: 2
+guardian:
+  max_turns: 6
+  model_timeout_ms: 20000
+  pause_if_error_rate_over: 0.3   # over the last 20 calls
+message_guard:
+  max_chars: 160
+  forbidden: [暗証番号, パスワード, 認証コード, ワンタイム, 詐欺です, 騙されています, 設定を変更すれば, 解除するには]
+  phone_allowlist: ["#9110"]      # plus the bank's official contact shown by the app, never typed by the model
+limits:
+  guardian_messages_per_transfer: 12
+  contact_notices_per_hour: 6
