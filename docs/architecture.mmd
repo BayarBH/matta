@@ -1,0 +1,62 @@
+flowchart LR
+  %% MATTA architecture: two trust zones. The app zone holds the LLM; the bank zone holds the money.
+  classDef zoneApp fill:#eef6ff,stroke:#3b6ea5,color:#1b2b3a
+  classDef zoneBank fill:#effaf1,stroke:#2f7d4a,color:#18321f
+  classDef llm fill:#fff4e0,stroke:#c07a00,color:#3a2600
+  classDef untrusted fill:#fdecec,stroke:#b03a3a,color:#3a1010,stroke-dasharray:4 3
+  classDef store fill:#f5f5f5,stroke:#777,color:#222
+  classDef person fill:#ffffff,stroke:#444,color:#111
+
+  CUST["預金者のブラウザ<br/>（customer）"]:::person
+  CONT["見守り人のブラウザ<br/>（contact）"]:::person
+  UNTR["信頼できない入力<br/>受取人名・メモ・レッドチーム文"]:::untrusted
+
+  subgraph APP["アプリ領域 — Cloud Run: matta-web（LLMあり／お金を動かせない）"]
+    direction TB
+    WEB["Next.js<br/>振込画面・見守りルール・ブラックボックス<br/>TransferFacts（銀行データのみで表示）"]
+    GATE["ポリシーゲート<br/>zod引数・回数制限・メッセージガード"]
+    GUARD["AIガーディアン<br/>ツール: 事実取得・質問・ルール説明・評価記録<br/>escalate・見守り人へ通知・#9110案内"]:::llm
+    READER["読み取りAI（隔離・ツールなし）<br/>名義・メモ → JSONフラグ"]:::llm
+    WEBDB[("Firestore (default)<br/>会話・通知・監査")]:::store
+  end
+
+  GEM["Gemini on Gemini Enterprise<br/>Agent Platform（Vertex AI）<br/>MODEL_SMART / MODEL_FAST"]:::llm
+
+  subgraph BANK["銀行領域 — Cloud Run: matta-bank（LLMなし／お金が動くのはここだけ）"]
+    direction TB
+    API["銀行API（Express）<br/>本人性・役割・サンドボックスを毎回検証"]
+    RULES["見守りルール（契約）<br/>版管理・SHA-256・締める/ゆるめる判定"]
+    REL["決定論的リリース判定<br/>保留期限／見守り人の承認のみで出金"]
+    LEDGER["台帳・口座"]
+    BANKDB[("Firestore bank<br/>sa-bank のみアクセス可")]:::store
+  end
+
+  TASKS["Cloud Tasks<br/>hold-evaluation"]
+
+  CUST -- "Firebase IDトークン" --> WEB
+  UNTR -. "データとしてのみ" .-> READER
+  WEB --> GATE --> GUARD
+  GUARD -- "sa-web（ADC）" --> GEM
+  READER -- "sa-web（ADC）" --> GEM
+  WEB --> READER
+  WEB --- WEBDB
+  GUARD --- WEBDB
+
+  WEB -- "照会・振込作成・状態取得<br/>Google IDトークン(sa-web) + 本人のFirebase IDトークン" --> API
+  GUARD == "escalate のみ（保留→見守り人の承認が必要・一方向）<br/>Google IDトークン(sa-web)" ==> API
+
+  CUST -- "取消・ルール変更（再認証）<br/>Firebase IDトークン（直接・CORS）" --> API
+  CONT -- "承認／不承認（理由必須）<br/>Firebase IDトークン（直接・CORS）" --> API
+
+  TASKS -- "OIDC（sa-bank）" --> API
+  API --> RULES
+  API --> REL --> LEDGER
+  RULES --- BANKDB
+  LEDGER --- BANKDB
+  API -. "保留期限でタスク登録" .-> TASKS
+
+  NOREL["✕ AIからリリース・決済・ルール緩和への経路は存在しない<br/>AIは止められるが、通せない。"]:::untrusted
+  GUARD ~~~ NOREL
+
+  class APP zoneApp
+  class BANK zoneBank
