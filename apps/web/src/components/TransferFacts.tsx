@@ -42,7 +42,12 @@ export function TransferFacts({ t }: { t: ContactTransferView }) {
         <p className="text-2xl font-semibold tabular-nums">{yen(t.amountJpy)}</p>
         <span className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${STATUS_STYLE[t.status]}`}>{STATUS_JA[t.status]}</span>
       </div>
-      {head && <p className="rounded bg-stone-50 px-3 py-2 text-stone-700">{head}</p>}
+      {head && (
+        <div className={`rounded-lg border px-3 py-2.5 ${STATUS_STYLE[t.status]}`}>
+          <p className="font-medium">{head}</p>
+          <p className="mt-1 text-xs opacity-80">あなたのルール：{t.explanationJa}</p>
+        </div>
+      )}
       <dl className="grid grid-cols-[7rem_1fr] gap-x-3 gap-y-1.5">
         <dt className="text-stone-500">受取人</dt>
         <dd>
@@ -54,8 +59,12 @@ export function TransferFacts({ t }: { t: ContactTransferView }) {
         <dd className="tabular-nums">
           {t.payee.bankCode}-{t.payee.branchCode}-{t.payee.accountNumber}
         </dd>
-        <dt className="text-stone-500">あなたのルール</dt>
-        <dd>{t.explanationJa}</dd>
+        {!head && (
+          <>
+            <dt className="text-stone-500">あなたのルール</dt>
+            <dd>{t.explanationJa}</dd>
+          </>
+        )}
         <dt className="text-stone-500">受付</dt>
         <dd className="tabular-nums">{formatJst(t.createdAt)}</dd>
         {t.status === 'held' && t.holdUntil && (

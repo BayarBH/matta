@@ -10,12 +10,16 @@ const LINKS: Array<{ href: string; label: string; roles: Role[] }> = [
   { href: '/rules', label: '見守りルール', roles: ['customer', 'contact'] },
   { href: '/contact', label: '見守り人', roles: ['contact'] },
   { href: '/ops', label: '運営', roles: ['operator'] },
+  ...(process.env.NEXT_PUBLIC_DEMO_MODE === 'true'
+    ? [{ href: '/demo', label: 'デモ', roles: ['customer', 'operator'] as Role[] }]
+    : []),
+  { href: '/guide', label: 'ガイド', roles: ['customer', 'contact', 'operator'] },
 ];
 
 export function Nav({ role }: { role: Role }) {
   const path = usePathname();
   return (
-    <nav className="mb-5 flex items-center gap-1 border-b border-stone-200 pb-2 text-sm">
+    <nav className="mb-5 flex flex-wrap items-center gap-1 border-b border-stone-200 pb-2 text-sm">
       {LINKS.filter((l) => l.roles.includes(role)).map((l) => (
         <Link
           key={l.href}

@@ -102,6 +102,11 @@ function Pending({ pending, canWithdraw, onChange }: { pending: MandateChange[];
   return (
     <section className={`${card} space-y-2`}>
       <h2 className="text-base font-semibold">申請中の変更</h2>
+      {pending.some((c) => c.status === 'pending') && (
+        <p className="rounded-lg border border-amber-300 bg-amber-100 px-3 py-2.5 font-medium text-amber-950">
+          ルールをゆるめる変更は、冷却期間が過ぎるまで有効になりません（見守り人が承認した場合はすぐに有効）。見守り人にお知らせしました。
+        </p>
+      )}
       {pending.map((c) => (
         <div key={c.id} className="rounded border border-amber-200 bg-amber-50 p-3 text-sm">
           <p>

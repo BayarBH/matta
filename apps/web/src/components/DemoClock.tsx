@@ -1,7 +1,10 @@
 'use client';
 import { useState } from 'react';
 import { z } from 'zod';
-import { bankFetch, errorJa, post } from '@/lib/bankClient';
+import { bankFetch, errorJa, post, webFetch } from '@/lib/bankClient';
+
+/** Bank reset + web data cleanup (conversations, notices, runs, web audit) for one sandbox. */
+export const resetSandbox = (sandboxId: string) => webFetch('/api/demo/reset', post({ sandboxId }), z.object({ ok: z.literal(true) }));
 
 /** DEMO_MODE only: advance the sandbox clock or reset the sandbox (bank enforces DEMO_MODE and sandbox membership). */
 export function DemoClock({ sandboxId, onChange }: { sandboxId: string; onChange: () => void }) {
@@ -19,7 +22,18 @@ export function DemoClock({ sandboxId, onChange }: { sandboxId: string; onChange
     }
   }
 
-  const btn = 'rounded border border-stone-300 bg-white px-2.5 py-1 hover:bg-stone-100';
+  async function reset() {
+    setMsg('リセット…');
+    try {
+      await resetSandbox(sandboxId);
+      setMsg('リセットしました。');
+      onChange();
+    } catch (e) {
+      setMsg(errorJa(e));
+    }
+  }
+
+  const btn ='rounded border border-stone-300 bg-white px-2.5 py-1 hover:bg-stone-100';
   return (
     <div className="flex flex-wrap items-center gap-2 rounded-lg border border-dashed border-stone-300 bg-stone-50 p-3 text-xs">
       <span className="font-medium text-stone-600">デモ時計</span>
@@ -28,7 +42,7 @@ export function DemoClock({ sandboxId, onChange }: { sandboxId: string; onChange
           +{h}時間
         </button>
       ))}
-      <button className={btn} onClick={() => run('リセット', 'reset')}>
+      <button className={btn} onClick={() => reset()}>
         サンドボックスをリセット
       </button>
       {msg && <span className="text-stone-500">{msg}</span>}

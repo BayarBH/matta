@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { clientAuth } from '@/lib/firebase.client';
@@ -58,6 +59,13 @@ export default function LoginPage() {
       >
         {busy ? 'ログイン中…' : 'ログイン'}
       </button>
+      <div className="space-y-1 border-t border-stone-100 pt-3 text-xs text-stone-500">
+        <p>テスト用アカウント：customer-1@matta-demo.example（預金者）、contact-1@matta-demo.example（見守り人）。番号は 1〜3 です。</p>
+        <p>パスワードは応募フォームの「動作確認の方法」をご覧ください。</p>
+        <Link href="/guide" className="inline-block text-teal-800 underline underline-offset-2">
+          審査員ガイドを見る
+        </Link>
+      </div>
     </form>
   );
 }

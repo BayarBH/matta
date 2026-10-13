@@ -1,9 +1,9 @@
 'use client';
 import { useState } from 'react';
-import { z } from 'zod';
 import { useSession } from '@/lib/session';
-import { bankFetch, errorJa, post } from '@/lib/bankClient';
+import { errorJa } from '@/lib/bankClient';
 import { Nav } from '@/components/Nav';
+import { resetSandbox } from '@/components/DemoClock';
 import { OpsHeader } from '@/components/OpsHeader';
 
 const SANDBOXES = ['sandbox-1', 'sandbox-2', 'sandbox-3'];
@@ -15,7 +15,7 @@ export default function OpsPage() {
 
   const reset = async (sid: string) => {
     try {
-      await bankFetch(`/demo/sandboxes/${sid}/reset`, post(), z.object({ ok: z.literal(true) }));
+      await resetSandbox(sid);
       setMsg(`${sid} を初期状態に戻しました。`);
     } catch (e) {
       setMsg(errorJa(e));
