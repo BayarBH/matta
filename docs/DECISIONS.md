@@ -18,3 +18,6 @@ Firestore database IDs need 4–63 characters, so `dev` is rejected. Local datab
 
 ## 2026-10-13 — Models: MODEL_FAST=gemini-3.5-flash-lite, MODEL_SMART=gemini-3.8-flash
 Chosen from what Vertex (location `global`) lists for this project, non-preview only so they outlive the judging window. `gemini-3-flash` does not exist; `gemini-3-pro` passes `models.get` but 404s on `generateContent`, so `check:models` now always runs a 1-token generation ping. A flash model for the guardian keeps conversation latency low for the live demo; revisit a Pro model only if Phase 2 judgment is weak.
+
+## 2026-10-13 — Firebase setup via REST; seed passwords generated locally
+Email/password sign-in enabled and a dedicated web app `matta-web` registered through the Identity Toolkit / Firebase Management APIs (no console clicks; reproducible in Phase 0B). Seed passwords were generated with `openssl rand` and live only in the gitignored root `.env.local`; they move to Secret Manager in Phase 0B. Phase 0A verified: 7 users sign in via signInWithPassword, the bank verifies each Firebase token and claims, operator-only `/api/debug/bank` returns the caller (dev-insecure locally), customers get 403.
