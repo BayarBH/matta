@@ -29,3 +29,13 @@ Email/password sign-in enabled and a dedicated web app `matta-web` registered th
 - A pending loosening whose `fromVersion` is no longer active is rejected (not applied) so it can never undo a later tightening. Customer re-requests if needed.
 - W+C routes (lookup, create, get transfer) go through Next API routes; every C/K route is called from the browser directly (CORS = WEB_URL only). The web has no route that cancels, decides or settles.
 - Known simplification: the daily auto total counts all settled transfers (stricter than SPEC, never looser).
+
+## 2026-10-13 — Phase 0B deploy design (written, not yet run)
+- Images built by Cloud Build from the repo root (`infra/cloudbuild.yaml`, per-app Dockerfile) into Artifact Registry `matta`, then `gcloud run deploy --image`. `--source` can't build a pnpm workspace whose Dockerfile isn't at the root.
+- Deterministic Cloud Run URLs (`https://SERVICE-760253059957.asia-northeast1.run.app`) are set before the first deploy, so one pass: web is built with the final `NEXT_PUBLIC_BANK_URL`, bank CORS gets the final `WEB_URL`. Only these URLs are shared (the legacy hash URL is not an allowed CORS origin).
+- Both services `--allow-unauthenticated` at the edge; every non-public route checks app-level identity (Firebase ID token / sa-web Google ID token / Cloud Tasks OIDC). Alternative considered: Cloud Run IAM invoker on the bank with web calling via IAM — rejected because the contact's browser must call the bank directly.
+- `sa-web` and `sa-bank` get `roles/firebaseauth.viewer`: `verifyIdToken(token, true)` (revocation check) reads the user record.
+- Cloud Build runs as the default compute SA, which gets `roles/run.builder` (per Cloud Run docs).
+- Firestore separation: `roles/datastore.user` with IAM condition `resource.name=="projects/P/databases/<db>"` (syntax from the Firestore manage-databases docs; the `(default)` form is inferred from the resource-name format). Fallback: drop the condition and record it here.
+- Demo passwords live in Secret Manager as the source of truth; no service reads them at runtime, so no accessor bindings yet.
+- Bank runs TS via tsx in the container (`--prod` install; tsx is a runtime dependency).

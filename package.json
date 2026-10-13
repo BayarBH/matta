@@ -16,8 +16,8 @@
     "seed": "tsx --env-file-if-exists=.env.local scripts/seed-users.ts && tsx --env-file=apps/demo-bank/.env.local scripts/seed-sandboxes.ts",
     "scenarios:validate": "echo 'not yet (Phase 3)' && exit 1",
     "eval": "echo 'not yet (Phase 4)' && exit 1",
-    "deploy:all": "echo 'not yet (Phase 0B)' && exit 1",
-    "smoke": "echo 'not yet (Phase 0B)' && exit 1"
+    "deploy:all": "bash infra/deploy.sh",
+    "smoke": "tsx scripts/smoke.ts"
   },
   "devDependencies": {
     "@google/genai": "^2.29.0",
