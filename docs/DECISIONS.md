@@ -21,3 +21,11 @@ Chosen from what Vertex (location `global`) lists for this project, non-preview 
 
 ## 2026-10-13 — Firebase setup via REST; seed passwords generated locally
 Email/password sign-in enabled and a dedicated web app `matta-web` registered through the Identity Toolkit / Firebase Management APIs (no console clicks; reproducible in Phase 0B). Seed passwords were generated with `openssl rand` and live only in the gitignored root `.env.local`; they move to Secret Manager in Phase 0B. Phase 0A verified: 7 users sign in via signInWithPassword, the bank verifies each Firebase token and claims, operator-only `/api/debug/bank` returns the caller (dev-insecure locally), customers get 403.
+
+## 2026-10-13 — Phase 1 bank design
+- One `Store` type (get / where / all / set / del / tx) with Firestore and in-memory implementations; tests run with no network. Transaction writes are buffered and committed at the end (Firestore reads-before-writes).
+- Hold evaluation: demo-clock advance, `/internal/holds/evaluate` (Cloud Tasks OIDC, sa-bank allowlist), and a 30 s poll in `TASKS_MODE=inline`. In cloud mode one task per held transfer at its real-time `holdUntil`.
+- Settlement re-checks the balance and cancels instead of overdrawing.
+- A pending loosening whose `fromVersion` is no longer active is rejected (not applied) so it can never undo a later tightening. Customer re-requests if needed.
+- W+C routes (lookup, create, get transfer) go through Next API routes; every C/K route is called from the browser directly (CORS = WEB_URL only). The web has no route that cancels, decides or settles.
+- Known simplification: the daily auto total counts all settled transfers (stricter than SPEC, never looser).

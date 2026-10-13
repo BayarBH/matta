@@ -13,7 +13,7 @@
     "test": "pnpm -r test",
     "lint": "pnpm -r lint",
     "check:models": "tsx --env-file-if-exists=.env.local scripts/check-models.ts",
-    "seed": "tsx --env-file-if-exists=.env.local scripts/seed-users.ts",
+    "seed": "tsx --env-file-if-exists=.env.local scripts/seed-users.ts && tsx --env-file=apps/demo-bank/.env.local scripts/seed-sandboxes.ts",
     "scenarios:validate": "echo 'not yet (Phase 3)' && exit 1",
     "eval": "echo 'not yet (Phase 4)' && exit 1",
     "deploy:all": "echo 'not yet (Phase 0B)' && exit 1",
