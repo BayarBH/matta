@@ -78,6 +78,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@google/genai':
+        specifier: ^2.29.0
+        version: 2.29.0
       '@matta/core':
         specifier: workspace:^
         version: link:../../packages/core

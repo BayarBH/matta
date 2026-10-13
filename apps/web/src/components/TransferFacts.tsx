@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { formatJst, type ContactTransferView, type PayeeKind, type TransferStatus } from '@matta/core';
 import { REASON_JA } from '@/lib/reasonCodes';
 
@@ -89,6 +90,12 @@ export function TransferFacts({ t }: { t: ContactTransferView }) {
             ))}
           </ul>
         </div>
+      )}
+      {/* Only the customer's full Transfer carries customerUid; contacts' limited view gets no audit link. */}
+      {'customerUid' in t && (
+        <Link href={`/audit/${t.id}`} className="inline-block text-xs text-teal-800 underline underline-offset-2">
+          ブラックボックスを見る
+        </Link>
       )}
     </section>
   );

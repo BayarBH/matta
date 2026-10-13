@@ -308,3 +308,20 @@ describe('demo controls', () => {
     expect((await api().get('/v1/transfers').set('x-user-token', 'customer-1')).body.transfers).toEqual([]);
   });
 });
+
+describe('ops metrics', () => {
+  it('is operator-only and counts transfers across sandboxes', async () => {
+    expect((await api().get('/v1/ops/metrics').set('x-user-token', 'customer-1')).status).toBe(403);
+    await send(RENT, 85_000);
+    const held = await send(DEALER, 300_000);
+    await send(DEALER, 1_200_000);
+    await advance(24);
+    expect(await status(held.id)).toBe('settled');
+    const m = (await api().get('/v1/ops/metrics').set('x-user-token', 'operator')).body;
+    expect(m.byStatus).toEqual({ settled: 2, contact_required: 1 });
+    expect(m.byRule).toMatchObject({ 'R-EVERYDAY-REG': 1, 'R-HOLD-DEFAULT': 1, 'R-CONTACT-LARGE-NEW': 1 });
+    expect(m.contactRequired).toBe(1);
+    expect(m.openHolds).toBe(0);
+    expect(m.medianAddedDelayMinLegit).toBeGreaterThanOrEqual(24 * 60);
+  });
+});

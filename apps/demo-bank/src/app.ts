@@ -531,6 +531,29 @@ export function createApp(ctx: Ctx, v: Verifiers) {
     }),
   );
 
+  app.get(
+    '/v1/ops/metrics',
+    user('operator'),
+    h(async (_req, res) => {
+      const all = (await store.all('transfers')).map((d) => StoredTransfer.parse(d));
+      const count = (key: (t: StoredTransfer) => string) =>
+        all.reduce<Record<string, number>>((acc, t) => ((acc[key(t)] = (acc[key(t)] ?? 0) + 1), acc), {});
+      // Added delay for transfers that settled but were not cleared instantly (sandbox minutes).
+      const delays = all
+        .filter((t) => t.status === 'settled' && t.settledAt && t.settledAt !== t.createdAt)
+        .map((t) => (Date.parse(t.settledAt!) - Date.parse(t.createdAt)) / 60_000)
+        .sort((a, b) => a - b);
+      const mid = delays.length >> 1;
+      res.json({
+        byStatus: count((t) => t.status),
+        byRule: count((t) => t.ruleId),
+        openHolds: all.filter((t) => t.status === 'held').length,
+        contactRequired: all.filter((t) => t.status === 'contact_required').length,
+        medianAddedDelayMinLegit: delays.length ? (delays.length % 2 ? delays[mid]! : (delays[mid - 1]! + delays[mid]!) / 2) : null,
+      });
+    }),
+  );
+
   app.post(
     '/internal/holds/evaluate',
     T,

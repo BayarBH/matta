@@ -9,6 +9,7 @@ const LINKS: Array<{ href: string; label: string; roles: Role[] }> = [
   { href: '/app', label: '振込', roles: ['customer', 'operator'] },
   { href: '/rules', label: '見守りルール', roles: ['customer', 'contact'] },
   { href: '/contact', label: '見守り人', roles: ['contact'] },
+  { href: '/ops', label: '運営', roles: ['operator'] },
 ];
 
 export function Nav({ role }: { role: Role }) {
