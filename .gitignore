@@ -12,3 +12,4 @@ next-env.d.ts
 scenarios/A/
 scenarios/B/
 scenarios/SOURCES.md
+eval/.vitest-*.json

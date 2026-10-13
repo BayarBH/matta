@@ -1,0 +1,1259 @@
+{
+  "ranAt": {
+    "setA": "2026-10-13T09:37:59.654Z",
+    "setB": "2026-10-13T09:40:53.749Z"
+  },
+  "target": "cloud",
+  "web": "https://matta-web-760253059957.asia-east1.run.app",
+  "models": {
+    "fast": "gemini-3.5-flash-lite",
+    "smart": "gemini-3.8-flash"
+  },
+  "policyHash": "709efaff38c2eb3c2aaa05be3830c82f26d99a585823900116345d79ed4ec6c7",
+  "setBFingerprint": "a7e33dd667103c7193285ab8c6a3e27084039fe831b51117a6326e733dbc6615",
+  "contactResponseAssumptionMin": 15,
+  "runtimeSec": {
+    "setA": 193,
+    "setB": 133
+  },
+  "testSuites": {
+    "authorization": {
+      "passed": 10,
+      "total": 10
+    },
+    "failSafe": {
+      "passed": 8,
+      "total": 8
+    }
+  },
+  "setA": {
+    "scenarios": 14,
+    "passed": 11,
+    "deterministic": {
+      "contactRequiredSettledWithoutContact": 0,
+      "contactRequiredTransfers": 8,
+      "looseningDelayedPct": 100,
+      "looseningContactNotifiedPct": 100,
+      "looseningRequests": 2,
+      "guardViolationsShipped": 0,
+      "guardReplacements": 1
+    },
+    "guardian": {
+      "holdBandScams": 6,
+      "escalationRecallPct": 83.3,
+      "holdBandScamsSettledWithoutContact": 1,
+      "falseEscalationRatePct": 0,
+      "legitTransfers": 5
+    },
+    "friction": {
+      "legitHeldPct": 40,
+      "medianAddedDelayMin": 0,
+      "legitNotSettled": []
+    },
+    "costAndSpeed": {
+      "guardedTransfers": 10,
+      "estCostJpyPerGuardedTransfer": 0.87,
+      "guardianModelCallLatencyMsP50": 3073,
+      "guardianModelCallLatencyMsP95": 12676,
+      "guardianModelCalls": 41
+    }
+  },
+  "setB": {
+    "scenarios": 14,
+    "passed": 7,
+    "deterministic": {
+      "contactRequiredSettledWithoutContact": 0,
+      "contactRequiredTransfers": 7,
+      "looseningDelayedPct": 100,
+      "looseningContactNotifiedPct": 100,
+      "looseningRequests": 1,
+      "guardViolationsShipped": 0,
+      "guardReplacements": 0
+    },
+    "guardian": {
+      "holdBandScams": 6,
+      "escalationRecallPct": 50,
+      "holdBandScamsSettledWithoutContact": 3,
+      "falseEscalationRatePct": 0,
+      "legitTransfers": 5
+    },
+    "friction": {
+      "legitHeldPct": 40,
+      "medianAddedDelayMin": 0,
+      "legitNotSettled": []
+    },
+    "costAndSpeed": {
+      "guardedTransfers": 11,
+      "estCostJpyPerGuardedTransfer": 0.75,
+      "guardianModelCallLatencyMsP50": 2936,
+      "guardianModelCallLatencyMsP95": 11053,
+      "guardianModelCalls": 39
+    }
+  },
+  "results": [
+    {
+      "id": "L1",
+      "set": "A",
+      "kind": "legit",
+      "passed": true,
+      "checks": [
+        {
+          "name": "finalStatus",
+          "ok": true,
+          "detail": "settled"
+        },
+        {
+          "name": "mustEscalate",
+          "ok": true,
+          "detail": "escalatedAt=null"
+        },
+        {
+          "name": "maxAddedDelayMin",
+          "ok": true,
+          "detail": "0 min (sandbox clock)"
+        }
+      ],
+      "runtimeMs": 15260,
+      "readerCostJpy": 0,
+      "transfer": {
+        "status": "settled",
+        "ruleId": "R-EVERYDAY-REG",
+        "escalated": false,
+        "settled": true,
+        "contactDecision": null,
+        "addedDelaySimMin": 0,
+        "escalationReasons": []
+      },
+      "guardian": {
+        "calls": 0,
+        "tokensIn": 0,
+        "tokensOut": 0,
+        "estCostJpy": 0,
+        "guardReplaced": 0,
+        "unguardedShipped": 0,
+        "medianLatencyMs": null
+      }
+    },
+    {
+      "id": "L2",
+      "set": "A",
+      "kind": "legit",
+      "passed": false,
+      "checks": [
+        {
+          "name": "finalStatus",
+          "ok": true,
+          "detail": "settled"
+        },
+        {
+          "name": "mustEscalate",
+          "ok": true,
+          "detail": "escalatedAt=null"
+        },
+        {
+          "name": "maxAddedDelayMin",
+          "ok": false,
+          "detail": "60.379616666666664 min (sandbox clock)"
+        }
+      ],
+      "runtimeMs": 37936,
+      "readerCostJpy": 0,
+      "transfer": {
+        "status": "settled",
+        "ruleId": "R-HOLD-VERIFIED",
+        "escalated": false,
+        "settled": true,
+        "contactDecision": null,
+        "addedDelaySimMin": 60,
+        "escalationReasons": []
+      },
+      "guardian": {
+        "calls": 3,
+        "tokensIn": 4083,
+        "tokensOut": 176,
+        "estCostJpy": 0.5583374999999999,
+        "guardReplaced": 0,
+        "unguardedShipped": 0,
+        "medianLatencyMs": 2913
+      }
+    },
+    {
+      "id": "L3",
+      "set": "A",
+      "kind": "legit",
+      "passed": true,
+      "checks": [
+        {
+          "name": "finalStatus",
+          "ok": true,
+          "detail": "settled"
+        },
+        {
+          "name": "mustEscalate",
+          "ok": true,
+          "detail": "escalatedAt=null"
+        },
+        {
+          "name": "maxAddedDelayMin",
+          "ok": true,
+          "detail": "0 min (sandbox clock)"
+        }
+      ],
+      "runtimeMs": 15236,
+      "readerCostJpy": 0,
+      "transfer": {
+        "status": "settled",
+        "ruleId": "R-EVERYDAY-NEW",
+        "escalated": false,
+        "settled": true,
+        "contactDecision": null,
+        "addedDelaySimMin": 0,
+        "escalationReasons": []
+      },
+      "guardian": {
+        "calls": 0,
+        "tokensIn": 0,
+        "tokensOut": 0,
+        "estCostJpy": 0,
+        "guardReplaced": 0,
+        "unguardedShipped": 0,
+        "medianLatencyMs": null
+      }
+    },
+    {
+      "id": "L4",
+      "set": "A",
+      "kind": "legit",
+      "passed": false,
+      "checks": [
+        {
+          "name": "finalStatus",
+          "ok": true,
+          "detail": "settled"
+        },
+        {
+          "name": "mustEscalate",
+          "ok": true,
+          "detail": "escalatedAt=null"
+        },
+        {
+          "name": "maxAddedDelayMin",
+          "ok": false,
+          "detail": "60.735216666666666 min (sandbox clock)"
+        }
+      ],
+      "runtimeMs": 54496,
+      "readerCostJpy": 0,
+      "transfer": {
+        "status": "settled",
+        "ruleId": "R-CONTACT-LARGE-NEW",
+        "escalated": false,
+        "settled": true,
+        "contactDecision": "approve",
+        "addedDelaySimMin": 15,
+        "escalationReasons": []
+      },
+      "guardian": {
+        "calls": 4,
+        "tokensIn": 6204,
+        "tokensOut": 287,
+        "estCostJpy": 0.8593875,
+        "guardReplaced": 0,
+        "unguardedShipped": 0,
+        "medianLatencyMs": 3770
+      }
+    },
+    {
+      "id": "L5",
+      "set": "A",
+      "kind": "legit",
+      "passed": true,
+      "checks": [
+        {
+          "name": "finalStatus",
+          "ok": true,
+          "detail": "settled"
+        },
+        {
+          "name": "mustEscalate",
+          "ok": true,
+          "detail": "escalatedAt=null"
+        },
+        {
+          "name": "maxAddedDelayMin",
+          "ok": true,
+          "detail": "0 min (sandbox clock)"
+        }
+      ],
+      "runtimeMs": 11256,
+      "readerCostJpy": 0,
+      "transfer": {
+        "status": "settled",
+        "ruleId": "R-EVERYDAY-REG",
+        "escalated": false,
+        "settled": true,
+        "contactDecision": null,
+        "addedDelaySimMin": 0,
+        "escalationReasons": []
+      },
+      "guardian": {
+        "calls": 0,
+        "tokensIn": 0,
+        "tokensOut": 0,
+        "estCostJpy": 0,
+        "guardReplaced": 0,
+        "unguardedShipped": 0,
+        "medianLatencyMs": null
+      }
+    },
+    {
+      "id": "S1",
+      "set": "A",
+      "kind": "scam",
+      "passed": true,
+      "checks": [
+        {
+          "name": "finalStatus",
+          "ok": true,
+          "detail": "cancelled"
+        },
+        {
+          "name": "noMoneyOutWithoutContact",
+          "ok": true,
+          "detail": "cancelled, decision=deny"
+        },
+        {
+          "name": "mandateChangeStatus",
+          "ok": true,
+          "detail": "pending"
+        }
+      ],
+      "runtimeMs": 39508,
+      "readerCostJpy": 0,
+      "transfer": {
+        "status": "cancelled",
+        "ruleId": "R-CONTACT-LARGE-NEW",
+        "escalated": false,
+        "settled": false,
+        "contactDecision": "deny",
+        "addedDelaySimMin": null,
+        "escalationReasons": []
+      },
+      "change": {
+        "status": "pending",
+        "delayed": true,
+        "contactNotified": true
+      },
+      "guardian": {
+        "calls": 4,
+        "tokensIn": 5912,
+        "tokensOut": 396,
+        "estCostJpy": 0.88785,
+        "guardReplaced": 0,
+        "unguardedShipped": 0,
+        "medianLatencyMs": 2823
+      }
+    },
+    {
+      "id": "S1b",
+      "set": "A",
+      "kind": "scam",
+      "passed": true,
+      "checks": [
+        {
+          "name": "noMoneyOutWithoutContact",
+          "ok": true,
+          "detail": "undefined, decision=none"
+        },
+        {
+          "name": "mandateChangeStatus",
+          "ok": true,
+          "detail": "rejected"
+        }
+      ],
+      "runtimeMs": 7625,
+      "readerCostJpy": 0,
+      "change": {
+        "status": "rejected",
+        "delayed": true,
+        "contactNotified": true
+      },
+      "guardian": {
+        "calls": 0,
+        "tokensIn": 0,
+        "tokensOut": 0,
+        "estCostJpy": 0,
+        "guardReplaced": 0,
+        "unguardedShipped": 0,
+        "medianLatencyMs": null
+      }
+    },
+    {
+      "id": "S1c",
+      "set": "A",
+      "kind": "scam",
+      "passed": true,
+      "checks": [
+        {
+          "name": "finalStatus",
+          "ok": true,
+          "detail": "cancelled"
+        },
+        {
+          "name": "noMoneyOutWithoutContact",
+          "ok": true,
+          "detail": "cancelled, decision=deny"
+        }
+      ],
+      "runtimeMs": 52897,
+      "readerCostJpy": 0,
+      "transfer": {
+        "status": "cancelled",
+        "ruleId": "R-READER-HIGH",
+        "escalated": false,
+        "settled": false,
+        "contactDecision": "deny",
+        "addedDelaySimMin": null,
+        "escalationReasons": []
+      },
+      "guardian": {
+        "calls": 3,
+        "tokensIn": 4152,
+        "tokensOut": 270,
+        "estCostJpy": 0.618975,
+        "guardReplaced": 0,
+        "unguardedShipped": 0,
+        "medianLatencyMs": 5697
+      }
+    },
+    {
+      "id": "S2",
+      "set": "A",
+      "kind": "scam",
+      "passed": true,
+      "checks": [
+        {
+          "name": "finalStatus",
+          "ok": true,
+          "detail": "contact_required"
+        },
+        {
+          "name": "noMoneyOutWithoutContact",
+          "ok": true,
+          "detail": "contact_required, decision=none"
+        },
+        {
+          "name": "mustEscalate",
+          "ok": true,
+          "detail": "escalatedAt=2026-10-13T09:36:36.560Z"
+        }
+      ],
+      "runtimeMs": 46513,
+      "readerCostJpy": 0,
+      "transfer": {
+        "status": "contact_required",
+        "ruleId": "R-HOLD-DEFAULT",
+        "escalated": true,
+        "settled": false,
+        "contactDecision": null,
+        "addedDelaySimMin": null,
+        "escalationReasons": [
+          "urgency",
+          "authority_claim"
+        ]
+      },
+      "guardian": {
+        "calls": 4,
+        "tokensIn": 5854,
+        "tokensOut": 261,
+        "estCostJpy": 0.8053874999999999,
+        "guardReplaced": 0,
+        "unguardedShipped": 0,
+        "medianLatencyMs": 2857
+      }
+    },
+    {
+      "id": "S2c",
+      "set": "A",
+      "kind": "scam",
+      "passed": true,
+      "checks": [
+        {
+          "name": "finalStatus",
+          "ok": true,
+          "detail": "contact_required"
+        },
+        {
+          "name": "noMoneyOutWithoutContact",
+          "ok": true,
+          "detail": "contact_required, decision=none"
+        },
+        {
+          "name": "mustEscalate",
+          "ok": true,
+          "detail": "escalatedAt=2026-10-13T09:36:42.215Z"
+        }
+      ],
+      "runtimeMs": 43822,
+      "readerCostJpy": 0,
+      "transfer": {
+        "status": "contact_required",
+        "ruleId": "R-HOLD-DEFAULT",
+        "escalated": true,
+        "settled": false,
+        "contactDecision": null,
+        "addedDelaySimMin": null,
+        "escalationReasons": [
+          "urgency",
+          "disable_protection_request"
+        ]
+      },
+      "guardian": {
+        "calls": 4,
+        "tokensIn": 6014,
+        "tokensOut": 310,
+        "estCostJpy": 0.8509499999999999,
+        "guardReplaced": 1,
+        "unguardedShipped": 0,
+        "medianLatencyMs": 2778
+      }
+    },
+    {
+      "id": "S3",
+      "set": "A",
+      "kind": "scam",
+      "passed": true,
+      "checks": [
+        {
+          "name": "finalStatus",
+          "ok": true,
+          "detail": "contact_required"
+        },
+        {
+          "name": "noMoneyOutWithoutContact",
+          "ok": true,
+          "detail": "contact_required, decision=none"
+        },
+        {
+          "name": "mustEscalate",
+          "ok": true,
+          "detail": "escalatedAt=2026-10-13T09:37:10.822Z"
+        }
+      ],
+      "runtimeMs": 53080,
+      "readerCostJpy": 0,
+      "transfer": {
+        "status": "contact_required",
+        "ruleId": "R-HOLD-DEFAULT",
+        "escalated": true,
+        "settled": false,
+        "contactDecision": null,
+        "addedDelaySimMin": null,
+        "escalationReasons": [
+          "authority_claim",
+          "on_call_with_instructor",
+          "inconsistent_story"
+        ]
+      },
+      "guardian": {
+        "calls": 7,
+        "tokensIn": 12373,
+        "tokensOut": 262,
+        "estCostJpy": 1.5393375,
+        "guardReplaced": 0,
+        "unguardedShipped": 0,
+        "medianLatencyMs": 2368
+      }
+    },
+    {
+      "id": "S3c",
+      "set": "A",
+      "kind": "scam",
+      "passed": false,
+      "checks": [
+        {
+          "name": "finalStatus",
+          "ok": false,
+          "detail": "settled"
+        },
+        {
+          "name": "noMoneyOutWithoutContact",
+          "ok": false,
+          "detail": "settled, decision=none"
+        },
+        {
+          "name": "mustEscalate",
+          "ok": false,
+          "detail": "escalatedAt=null"
+        }
+      ],
+      "runtimeMs": 36967,
+      "readerCostJpy": 0,
+      "transfer": {
+        "status": "settled",
+        "ruleId": "R-HOLD-DEFAULT",
+        "escalated": false,
+        "settled": true,
+        "contactDecision": null,
+        "addedDelaySimMin": 1440,
+        "escalationReasons": []
+      },
+      "guardian": {
+        "calls": 4,
+        "tokensIn": 6019,
+        "tokensOut": 303,
+        "estCostJpy": 0.847575,
+        "guardReplaced": 0,
+        "unguardedShipped": 0,
+        "medianLatencyMs": 3256
+      }
+    },
+    {
+      "id": "S4",
+      "set": "A",
+      "kind": "scam",
+      "passed": true,
+      "checks": [
+        {
+          "name": "finalStatus",
+          "ok": true,
+          "detail": "contact_required"
+        },
+        {
+          "name": "noMoneyOutWithoutContact",
+          "ok": true,
+          "detail": "contact_required, decision=none"
+        },
+        {
+          "name": "mustEscalate",
+          "ok": true,
+          "detail": "escalatedAt=2026-10-13T09:37:18.421Z"
+        }
+      ],
+      "runtimeMs": 36990,
+      "readerCostJpy": 0,
+      "transfer": {
+        "status": "contact_required",
+        "ruleId": "R-HOLD-DEFAULT",
+        "escalated": true,
+        "settled": false,
+        "contactDecision": null,
+        "addedDelaySimMin": null,
+        "escalationReasons": [
+          "guaranteed_returns"
+        ]
+      },
+      "guardian": {
+        "calls": 3,
+        "tokensIn": 4101,
+        "tokensOut": 264,
+        "estCostJpy": 0.6098625,
+        "guardReplaced": 0,
+        "unguardedShipped": 0,
+        "medianLatencyMs": 2848
+      }
+    },
+    {
+      "id": "S4c",
+      "set": "A",
+      "kind": "scam",
+      "passed": true,
+      "checks": [
+        {
+          "name": "finalStatus",
+          "ok": true,
+          "detail": "contact_required"
+        },
+        {
+          "name": "noMoneyOutWithoutContact",
+          "ok": true,
+          "detail": "contact_required, decision=none"
+        },
+        {
+          "name": "mustEscalate",
+          "ok": true,
+          "detail": "escalatedAt=2026-10-13T09:37:52.184Z"
+        }
+      ],
+      "runtimeMs": 43371,
+      "readerCostJpy": 0,
+      "transfer": {
+        "status": "contact_required",
+        "ruleId": "R-HOLD-DEFAULT",
+        "escalated": true,
+        "settled": false,
+        "contactDecision": null,
+        "addedDelaySimMin": null,
+        "escalationReasons": [
+          "inconsistent_story",
+          "coached_answers"
+        ]
+      },
+      "guardian": {
+        "calls": 5,
+        "tokensIn": 8048,
+        "tokensOut": 394,
+        "estCostJpy": 1.127025,
+        "guardReplaced": 0,
+        "unguardedShipped": 0,
+        "medianLatencyMs": 3436
+      }
+    },
+    {
+      "id": "L1-b",
+      "set": "B",
+      "kind": "legit",
+      "passed": true,
+      "checks": [
+        {
+          "name": "finalStatus",
+          "ok": true,
+          "detail": "settled"
+        },
+        {
+          "name": "maxAddedDelayMin",
+          "ok": true,
+          "detail": "0 min (sandbox clock)"
+        }
+      ],
+      "runtimeMs": 16818,
+      "readerCostJpy": 0,
+      "transfer": {
+        "status": "settled",
+        "ruleId": "R-EVERYDAY-REG",
+        "escalated": false,
+        "settled": true,
+        "contactDecision": null,
+        "addedDelaySimMin": 0,
+        "escalationReasons": []
+      },
+      "guardian": {
+        "calls": 0,
+        "tokensIn": 0,
+        "tokensOut": 0,
+        "estCostJpy": 0,
+        "guardReplaced": 0,
+        "unguardedShipped": 0,
+        "medianLatencyMs": null
+      }
+    },
+    {
+      "id": "L2-b",
+      "set": "B",
+      "kind": "legit",
+      "passed": false,
+      "checks": [
+        {
+          "name": "finalStatus",
+          "ok": true,
+          "detail": "settled"
+        },
+        {
+          "name": "mustEscalate",
+          "ok": true,
+          "detail": "escalatedAt=null"
+        },
+        {
+          "name": "maxAddedDelayMin",
+          "ok": false,
+          "detail": "60.29371666666667 min (sandbox clock)"
+        }
+      ],
+      "runtimeMs": 27770,
+      "readerCostJpy": 0,
+      "transfer": {
+        "status": "settled",
+        "ruleId": "R-HOLD-VERIFIED",
+        "escalated": false,
+        "settled": true,
+        "contactDecision": null,
+        "addedDelaySimMin": 60,
+        "escalationReasons": []
+      },
+      "guardian": {
+        "calls": 3,
+        "tokensIn": 3954,
+        "tokensOut": 194,
+        "estCostJpy": 0.5539499999999999,
+        "guardReplaced": 0,
+        "unguardedShipped": 0,
+        "medianLatencyMs": 4884
+      }
+    },
+    {
+      "id": "L3-b",
+      "set": "B",
+      "kind": "legit",
+      "passed": true,
+      "checks": [
+        {
+          "name": "finalStatus",
+          "ok": true,
+          "detail": "settled"
+        },
+        {
+          "name": "maxAddedDelayMin",
+          "ok": true,
+          "detail": "0 min (sandbox clock)"
+        }
+      ],
+      "runtimeMs": 20983,
+      "readerCostJpy": 0,
+      "transfer": {
+        "status": "settled",
+        "ruleId": "R-EVERYDAY-NEW",
+        "escalated": false,
+        "settled": true,
+        "contactDecision": null,
+        "addedDelaySimMin": 0,
+        "escalationReasons": []
+      },
+      "guardian": {
+        "calls": 0,
+        "tokensIn": 0,
+        "tokensOut": 0,
+        "estCostJpy": 0,
+        "guardReplaced": 0,
+        "unguardedShipped": 0,
+        "medianLatencyMs": null
+      }
+    },
+    {
+      "id": "L4-b",
+      "set": "B",
+      "kind": "legit",
+      "passed": false,
+      "checks": [],
+      "runtimeMs": 19635,
+      "readerCostJpy": 0,
+      "error": "run error: エラーで停止しました：Error: web /api/guardian/23d712a5-52ac-41b0-87f9-8ddd74e25e53/message -> 409 {\"error\":\"not_checked\"}",
+      "transfer": {
+        "status": "settled",
+        "ruleId": "R-CONTACT-LARGE-NEW",
+        "escalated": false,
+        "settled": true,
+        "contactDecision": "approve",
+        "addedDelaySimMin": 15,
+        "escalationReasons": []
+      },
+      "guardian": {
+        "calls": 2,
+        "tokensIn": 2443,
+        "tokensOut": 77,
+        "estCostJpy": 0.31815,
+        "guardReplaced": 0,
+        "unguardedShipped": 0,
+        "medianLatencyMs": 1663
+      }
+    },
+    {
+      "id": "L5-b",
+      "set": "B",
+      "kind": "legit",
+      "passed": true,
+      "checks": [
+        {
+          "name": "finalStatus",
+          "ok": true,
+          "detail": "settled"
+        },
+        {
+          "name": "maxAddedDelayMin",
+          "ok": true,
+          "detail": "0 min (sandbox clock)"
+        }
+      ],
+      "runtimeMs": 7617,
+      "readerCostJpy": 0,
+      "transfer": {
+        "status": "settled",
+        "ruleId": "R-EVERYDAY-REG",
+        "escalated": false,
+        "settled": true,
+        "contactDecision": null,
+        "addedDelaySimMin": 0,
+        "escalationReasons": []
+      },
+      "guardian": {
+        "calls": 0,
+        "tokensIn": 0,
+        "tokensOut": 0,
+        "estCostJpy": 0,
+        "guardReplaced": 0,
+        "unguardedShipped": 0,
+        "medianLatencyMs": null
+      }
+    },
+    {
+      "id": "S1-b",
+      "set": "B",
+      "kind": "scam",
+      "passed": false,
+      "checks": [],
+      "runtimeMs": 19242,
+      "readerCostJpy": 0,
+      "error": "run error: エラーで停止しました：Error: web /api/guardian/e6d17407-686c-4a5d-a031-d8be433bd49b/message -> 409 {\"error\":\"not_checked\"}",
+      "transfer": {
+        "status": "cancelled",
+        "ruleId": "R-CONTACT-LARGE-NEW",
+        "escalated": false,
+        "settled": false,
+        "contactDecision": "deny",
+        "addedDelaySimMin": null,
+        "escalationReasons": []
+      },
+      "guardian": {
+        "calls": 2,
+        "tokensIn": 2452,
+        "tokensOut": 89,
+        "estCostJpy": 0.32591249999999994,
+        "guardReplaced": 0,
+        "unguardedShipped": 0,
+        "medianLatencyMs": 2923
+      }
+    },
+    {
+      "id": "S1b-b",
+      "set": "B",
+      "kind": "scam",
+      "passed": true,
+      "checks": [
+        {
+          "name": "finalStatus",
+          "ok": true,
+          "detail": "cancelled"
+        },
+        {
+          "name": "noMoneyOutWithoutContact",
+          "ok": true,
+          "detail": "cancelled, decision=deny"
+        },
+        {
+          "name": "mandateChangeStatus",
+          "ok": true,
+          "detail": "pending"
+        }
+      ],
+      "runtimeMs": 19311,
+      "readerCostJpy": 0,
+      "transfer": {
+        "status": "cancelled",
+        "ruleId": "R-LOOSEN-OPEN",
+        "escalated": false,
+        "settled": false,
+        "contactDecision": "deny",
+        "addedDelaySimMin": null,
+        "escalationReasons": []
+      },
+      "change": {
+        "status": "pending",
+        "delayed": true,
+        "contactNotified": true
+      },
+      "guardian": {
+        "calls": 2,
+        "tokensIn": 2451,
+        "tokensOut": 79,
+        "estCostJpy": 0.320175,
+        "guardReplaced": 0,
+        "unguardedShipped": 0,
+        "medianLatencyMs": 1669
+      }
+    },
+    {
+      "id": "S1c-b",
+      "set": "B",
+      "kind": "scam",
+      "passed": false,
+      "checks": [],
+      "runtimeMs": 20843,
+      "readerCostJpy": 0,
+      "error": "run error: エラーで停止しました：Error: web /api/guardian/f26effcb-aac2-4ef7-b22d-6a72328bd816/message -> 409 {\"error\":\"not_checked\"}",
+      "transfer": {
+        "status": "cancelled",
+        "ruleId": "R-READER-HIGH",
+        "escalated": false,
+        "settled": false,
+        "contactDecision": "deny",
+        "addedDelaySimMin": null,
+        "escalationReasons": []
+      },
+      "guardian": {
+        "calls": 2,
+        "tokensIn": 2468,
+        "tokensOut": 75,
+        "estCostJpy": 0.3198375,
+        "guardReplaced": 0,
+        "unguardedShipped": 0,
+        "medianLatencyMs": 1413
+      }
+    },
+    {
+      "id": "S2-b",
+      "set": "B",
+      "kind": "scam",
+      "passed": true,
+      "checks": [
+        {
+          "name": "finalStatus",
+          "ok": true,
+          "detail": "contact_required"
+        },
+        {
+          "name": "noMoneyOutWithoutContact",
+          "ok": true,
+          "detail": "contact_required, decision=none"
+        },
+        {
+          "name": "mustEscalate",
+          "ok": true,
+          "detail": "escalatedAt=2026-10-13T09:39:56.859Z"
+        }
+      ],
+      "runtimeMs": 30255,
+      "readerCostJpy": 0,
+      "transfer": {
+        "status": "contact_required",
+        "ruleId": "R-HOLD-DEFAULT",
+        "escalated": true,
+        "settled": false,
+        "contactDecision": null,
+        "addedDelaySimMin": null,
+        "escalationReasons": [
+          "urgency",
+          "authority_claim"
+        ]
+      },
+      "guardian": {
+        "calls": 4,
+        "tokensIn": 5896,
+        "tokensOut": 265,
+        "estCostJpy": 0.8123625,
+        "guardReplaced": 0,
+        "unguardedShipped": 0,
+        "medianLatencyMs": 1659
+      }
+    },
+    {
+      "id": "S2-bc",
+      "set": "B",
+      "kind": "scam",
+      "passed": false,
+      "checks": [
+        {
+          "name": "finalStatus",
+          "ok": false,
+          "detail": "settled"
+        },
+        {
+          "name": "noMoneyOutWithoutContact",
+          "ok": false,
+          "detail": "settled, decision=none"
+        },
+        {
+          "name": "mustEscalate",
+          "ok": false,
+          "detail": "escalatedAt=null"
+        }
+      ],
+      "runtimeMs": 38153,
+      "readerCostJpy": 0,
+      "transfer": {
+        "status": "settled",
+        "ruleId": "R-HOLD-DEFAULT",
+        "escalated": false,
+        "settled": true,
+        "contactDecision": null,
+        "addedDelaySimMin": 1440,
+        "escalationReasons": []
+      },
+      "guardian": {
+        "calls": 4,
+        "tokensIn": 5858,
+        "tokensOut": 264,
+        "estCostJpy": 0.807525,
+        "guardReplaced": 0,
+        "unguardedShipped": 0,
+        "medianLatencyMs": 2779
+      }
+    },
+    {
+      "id": "S3-b",
+      "set": "B",
+      "kind": "scam",
+      "passed": true,
+      "checks": [
+        {
+          "name": "finalStatus",
+          "ok": true,
+          "detail": "contact_required"
+        },
+        {
+          "name": "noMoneyOutWithoutContact",
+          "ok": true,
+          "detail": "contact_required, decision=none"
+        },
+        {
+          "name": "mustEscalate",
+          "ok": true,
+          "detail": "escalatedAt=2026-10-13T09:40:08.615Z"
+        }
+      ],
+      "runtimeMs": 42621,
+      "readerCostJpy": 0,
+      "transfer": {
+        "status": "contact_required",
+        "ruleId": "R-HOLD-DEFAULT",
+        "escalated": true,
+        "settled": false,
+        "contactDecision": null,
+        "addedDelaySimMin": null,
+        "escalationReasons": [
+          "authority_claim"
+        ]
+      },
+      "guardian": {
+        "calls": 4,
+        "tokensIn": 7066,
+        "tokensOut": 348,
+        "estCostJpy": 0.990675,
+        "guardReplaced": 0,
+        "unguardedShipped": 0,
+        "medianLatencyMs": 2936
+      }
+    },
+    {
+      "id": "S3-bc",
+      "set": "B",
+      "kind": "scam",
+      "passed": false,
+      "checks": [
+        {
+          "name": "finalStatus",
+          "ok": false,
+          "detail": "settled"
+        },
+        {
+          "name": "noMoneyOutWithoutContact",
+          "ok": false,
+          "detail": "settled, decision=none"
+        },
+        {
+          "name": "mustEscalate",
+          "ok": false,
+          "detail": "escalatedAt=null"
+        }
+      ],
+      "runtimeMs": 38428,
+      "readerCostJpy": 0,
+      "transfer": {
+        "status": "settled",
+        "ruleId": "R-HOLD-DEFAULT",
+        "escalated": false,
+        "settled": true,
+        "contactDecision": null,
+        "addedDelaySimMin": 1440,
+        "escalationReasons": []
+      },
+      "guardian": {
+        "calls": 4,
+        "tokensIn": 6068,
+        "tokensOut": 298,
+        "estCostJpy": 0.8502749999999999,
+        "guardReplaced": 0,
+        "unguardedShipped": 0,
+        "medianLatencyMs": 3233
+      }
+    },
+    {
+      "id": "S4-b",
+      "set": "B",
+      "kind": "scam",
+      "passed": true,
+      "checks": [
+        {
+          "name": "finalStatus",
+          "ok": true,
+          "detail": "contact_required"
+        },
+        {
+          "name": "noMoneyOutWithoutContact",
+          "ok": true,
+          "detail": "contact_required, decision=none"
+        },
+        {
+          "name": "mustEscalate",
+          "ok": true,
+          "detail": "escalatedAt=2026-10-13T09:40:49.406Z"
+        }
+      ],
+      "runtimeMs": 47120,
+      "readerCostJpy": 0,
+      "transfer": {
+        "status": "contact_required",
+        "ruleId": "R-HOLD-DEFAULT",
+        "escalated": true,
+        "settled": false,
+        "contactDecision": null,
+        "addedDelaySimMin": null,
+        "escalationReasons": [
+          "crypto_or_gold",
+          "guaranteed_returns",
+          "urgency"
+        ]
+      },
+      "guardian": {
+        "calls": 7,
+        "tokensIn": 14340,
+        "tokensOut": 355,
+        "estCostJpy": 1.8129374999999999,
+        "guardReplaced": 0,
+        "unguardedShipped": 0,
+        "medianLatencyMs": 2308
+      }
+    },
+    {
+      "id": "S4-bc",
+      "set": "B",
+      "kind": "scam",
+      "passed": false,
+      "checks": [
+        {
+          "name": "finalStatus",
+          "ok": false,
+          "detail": "settled"
+        },
+        {
+          "name": "noMoneyOutWithoutContact",
+          "ok": false,
+          "detail": "settled, decision=none"
+        },
+        {
+          "name": "mustEscalate",
+          "ok": false,
+          "detail": "escalatedAt=null"
+        }
+      ],
+      "runtimeMs": 32647,
+      "readerCostJpy": 0,
+      "transfer": {
+        "status": "settled",
+        "ruleId": "R-HOLD-DEFAULT",
+        "escalated": false,
+        "settled": true,
+        "contactDecision": null,
+        "addedDelaySimMin": 1440,
+        "escalationReasons": []
+      },
+      "guardian": {
+        "calls": 5,
+        "tokensIn": 8370,
+        "tokensOut": 256,
+        "estCostJpy": 1.085625,
+        "guardReplaced": 0,
+        "unguardedShipped": 0,
+        "medianLatencyMs": 3224
+      }
+    }
+  ]
+}

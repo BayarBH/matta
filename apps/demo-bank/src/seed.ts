@@ -49,6 +49,15 @@ export async function seedDirectory(store: Store): Promise<void> {
 
 const SANDBOX_SCOPED = ['transfers', 'ledger', 'mandateChanges', 'contactDecisions', 'bankAudit', 'payees'];
 
+const DAY_MS = 86_400_000;
+const JST_MS = 9 * 3_600_000;
+
+/** Offset that makes the sandbox clock read 10:00 JST today, so demos and eval never start inside quiet hours. */
+export function tenAmJstOffset(now: Date): number {
+  const jstMidnightUtc = Math.floor((now.getTime() + JST_MS) / DAY_MS) * DAY_MS - JST_MS;
+  return jstMidnightUtc + 10 * 3_600_000 - now.getTime();
+}
+
 /** Wipes and reseeds one sandbox (also used by POST /demo/sandboxes/:sid/reset). */
 export async function seedSandbox(store: Store, sid: string, now = new Date()): Promise<void> {
   const n = sid.replace('sandbox-', '');
@@ -60,7 +69,7 @@ export async function seedSandbox(store: Store, sid: string, now = new Date()): 
   }
   for (const d of await store.all(`mandates/${sid}/versions`)) await store.del(`mandates/${sid}/versions`, String(d.version));
 
-  await store.set('sandboxes', sid, { id: sid, clockOffsetMs: 0, customerUid, contactUids: [contactUid] });
+  await store.set('sandboxes', sid, { id: sid, clockOffsetMs: tenAmJstOffset(now), customerUid, contactUids: [contactUid] });
   await store.set('accounts', sid, {
     sandboxId: sid,
     customerUid,

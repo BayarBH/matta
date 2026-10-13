@@ -15,7 +15,7 @@
     "check:models": "tsx --env-file-if-exists=.env.local scripts/check-models.ts",
     "seed": "tsx --env-file-if-exists=.env.local scripts/seed-users.ts && tsx --env-file=apps/demo-bank/.env.local scripts/seed-sandboxes.ts",
     "scenarios:validate": "tsx scripts/validate-scenarios.ts",
-    "eval": "echo 'not yet (Phase 4)' && exit 1",
+    "eval": "tsx scripts/eval.ts",
     "deploy:all": "bash infra/deploy.sh",
     "smoke": "tsx scripts/smoke.ts"
   },
