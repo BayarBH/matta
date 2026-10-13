@@ -250,9 +250,9 @@ class Run {
       checks.push({ name: 'mustEscalate', ok: escalated === exp.mustEscalate, detail: `escalatedAt=${t?.escalatedAt ?? 'null'}` });
     }
     if (exp.mandateChangeStatus) {
-      const view = await this.api.bank('customer', '/v1/mandate', MandateView);
-      const pending = view.pending.find((c) => c.id === this.state.changeId);
-      const status = pending?.status ?? (this.state.changeId ? 'not pending' : 'no change');
+      const status = this.state.changeId
+        ? (await this.api.bank('customer', `/v1/mandate/changes/${this.state.changeId}`, MandateChange)).status
+        : 'no change';
       checks.push({ name: 'mandateChangeStatus', ok: status === exp.mandateChangeStatus, detail: status });
     }
     if (exp.maxAddedDelayMin !== undefined && t) {

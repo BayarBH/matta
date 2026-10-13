@@ -23,6 +23,7 @@ import { Mandate, MandateTerms, RuleId } from './mandate';
  *   POST /v1/mandate/changes                      C (auth_time ≤ 5 min, else 401 {error:'reauth_required'}) MandateChangeBody → MandateChange
  *   POST /v1/mandate/changes/:id/contact-decision K      MandateChangeDecisionBody → MandateChange
  *   POST /v1/mandate/changes/:id/withdraw         C      → MandateChange
+ *   GET  /v1/mandate/changes/:id                  C|K (own sandbox) → MandateChange
  *   GET  /v1/audit?transferId=                    C (own sandbox) | O → { events: AuditEvent[] }
  *   POST /internal/holds/evaluate                 T (Cloud Tasks OIDC, sa-bank) {sandboxId?} → { settled, branchReview, applied }
  *   POST /demo/sandboxes/:sid/reset               O | C of sid; DEMO_MODE → { ok }

@@ -106,7 +106,7 @@ export function createApp(ctx: Ctx, v: Verifiers) {
     if (req.user?.sandboxId !== sid) throw new HttpError(403, 'other_sandbox');
   };
 
-  app.get('/healthz', (_req, res) => {
+  app.get('/health', (_req, res) => {
     res.json({ ok: true });
   });
 
@@ -486,6 +486,18 @@ export function createApp(ctx: Ctx, v: Verifiers) {
         return rejected;
       });
       res.json(out);
+    }),
+  );
+
+  app.get(
+    '/v1/mandate/changes/:id',
+    user('customer', 'contact'),
+    h(async (req, res) => {
+      const raw = await store.get('mandateChanges', String(req.params.id));
+      if (!raw) throw new HttpError(404, 'change_not_found');
+      const change = MandateChange.parse(raw);
+      ownSandbox(req, change.sandboxId);
+      res.json(change);
     }),
   );
 

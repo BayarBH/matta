@@ -42,7 +42,7 @@ const preflight = (origin: string) =>
 console.log(`web=${WEB_URL}\nbank=${BANK_URL}`);
 const tokens: Record<string, string> = {};
 
-await check('bank /healthz', async () => ((await fetch(`${BANK_URL}/healthz`)).ok ? true : 'not ok'));
+await check('bank /health', async () => ((await fetch(`${BANK_URL}/health`)).ok ? true : 'not ok'));
 await check('web /login loads', async () => ((await fetch(`${WEB_URL}/login`)).ok ? true : 'not ok'));
 await check('bank /v1/health/secure without token → 401', async () => {
   const s = (await fetch(`${BANK_URL}/v1/health/secure`)).status;
