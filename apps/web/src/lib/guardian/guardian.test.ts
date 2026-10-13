@@ -67,6 +67,7 @@ function harness(script: Array<FunctionCall[] | Error>, status: Transfer['status
 
 const fc = (name: string, args: Record<string, unknown> = {}): FunctionCall => ({ name, args });
 const ask = (q = 'どのようなご用途か教えていただけますか。') => fc('ask_customer', { questionJa: q });
+const askC = (check: string) => fc('ask_customer', { questionJa: 'もう少し教えていただけますか。', check });
 const assess = (reasonCodes: string[], riskLevel = 'elevated') => fc('record_assessment', { scamPatterns: ['fake_billing'], reasonCodes, riskLevel, rationaleJa: 'テスト' });
 
 describe('guardian governance', () => {
@@ -151,10 +152,49 @@ describe('guardian governance', () => {
   });
 
   it('one elevated code does not escalate', async () => {
-    const h = harness([[fc('get_transfer_facts'), ask()], [assess(['urgency'], 'none'), fc('end_conversation')]]);
+    const h = harness([
+      [fc('get_transfer_facts'), askC('purpose')],
+      [assess(['urgency'], 'none'), askC('payee_source')],
+      [askC('on_call')],
+      [assess(['urgency'], 'none'), fc('end_conversation')],
+    ]);
     await runStep(h.deps, h.caller, 't1');
     await runStep(h.deps, h.caller, 't1', '今日中に払いたいだけです');
+    await runStep(h.deps, h.caller, 't1', '取引先から聞きました');
+    const conv = await runStep(h.deps, h.caller, 't1', 'いいえ');
+    expect(conv.status).toBe('closed');
     expect(h.calls.some((c) => c.path.endsWith('/escalate'))).toBe(false);
+  });
+
+  it('on a held transfer, end_conversation is refused until 3 of 4 teller checks are covered', async () => {
+    const h = harness([[fc('get_transfer_facts'), askC('purpose')], [assess([], 'none'), fc('end_conversation')], [askC('payee_source')]]);
+    await runStep(h.deps, h.caller, 't1');
+    const conv = await runStep(h.deps, h.caller, 't1', '家賃の支払いです');
+    expect(conv.status).toBe('open');
+    expect(conv.messages.at(-1)?.role).toBe('guardian');
+    expect(h.calls.some((c) => c.path.endsWith('/escalate'))).toBe(false);
+  });
+
+  it('end_conversation is allowed right after an escalation', async () => {
+    const h = harness([[fc('get_transfer_facts'), askC('purpose')], [assess(['authority_claim'], 'high'), fc('end_conversation')]]);
+    await runStep(h.deps, h.caller, 't1');
+    const conv = await runStep(h.deps, h.caller, 't1', '警察の方に言われました');
+    expect(conv.status).toBe('closed');
+    expect(h.transfer.status).toBe('contact_required');
+  });
+
+  it('a single model timeout is retried once instead of failing safe', async () => {
+    const h = harness([new Error('AbortError: This operation was aborted'), [fc('get_transfer_facts'), askC('purpose')]]);
+    const conv = await runStep(h.deps, h.caller, 't1');
+    expect(conv.failSafe).toBe(false);
+    expect(h.calls.some((c) => c.path.endsWith('/escalate'))).toBe(false);
+  });
+
+  it('ask_customer check tag is validated', async () => {
+    const h = harness([[fc('ask_customer', { questionJa: 'ご用途を教えていただけますか。', check: 'release' })], [askC('purpose')]]);
+    const conv = await runStep(h.deps, h.caller, 't1');
+    expect(conv.messages.filter((m) => m.role === 'guardian')).toHaveLength(1);
+    expect(conv.checks).toEqual(['purpose']);
   });
 
   it('end_conversation without an assessment is refused by the policy gate', async () => {

@@ -10,7 +10,7 @@ import {
   type SystemPolicy,
 } from '@matta/core';
 import { TOOL_ARGS, AUTO_NOTICE_JA, FAIL_SAFE_JA, RESOURCE_JA, type ToolName } from './tools';
-import type { Breaker, Conversation, ConversationView, GuardianStore } from './state';
+import { MIN_TELLER_CHECKS, TellerCheck, type Breaker, type Conversation, type ConversationView, type GuardianStore } from './state';
 import { estCostJpy } from '../../config/pricing';
 
 /** One model response, reduced to what the loop needs (keeps tests free of the SDK). */
@@ -60,6 +60,7 @@ export async function runStep(deps: Deps, caller: Caller, transferId: string, cu
     escalated: false,
     failSafe: false,
     resources: [],
+    checks: [],
     contentsJson: '[]',
   };
   if (conv.customerUid !== caller.uid) throw new ConversationClosed('not_owner');
@@ -101,8 +102,17 @@ export async function runStep(deps: Deps, caller: Caller, transferId: string, cu
     for (let i = 0; i < MAX_MODEL_CALLS_PER_STEP && !stop; i++) {
       const started = Date.now();
       let reply: ModelReply;
+      const call = () => deps.model(contents, AbortSignal.timeout(deps.policy.guardian.model_timeout_ms));
       try {
-        reply = await deps.model(contents, AbortSignal.timeout(deps.policy.guardian.model_timeout_ms));
+        try {
+          reply = await call();
+        } catch (e) {
+          // One retry on a timeout only (rare long-tail latency); the error still counts for the breaker. Still fails safe after.
+          if (!/abort|timeout/i.test(String(e))) throw e;
+          await recordCall(deps, true, breaker, probing);
+          await deps.audit({ ...base, actor: 'guardian', action: 'guardian.model_call', model: deps.modelName, latencyMs: Date.now() - started, outcome: 'error', detailsJa: 'AIの応答が時間内になかったため、1回だけ再試行します' });
+          reply = await call();
+        }
       } catch (e) {
         await recordCall(deps, true, breaker, probing);
         await deps.audit({ ...base, actor: 'guardian', action: 'guardian.model_call', model: deps.modelName, latencyMs: Date.now() - started, outcome: 'error', detailsJa: `AIの呼び出しに失敗しました（${String(e).slice(0, 60)}）` });
@@ -186,6 +196,7 @@ async function execTool(
       if (!g.ok) await deps.audit({ ...base, actor: 'guardian', action: 'guard.violation', outcome: 'rejected', detailsJa: `メッセージガードが文面を差し替えました（${g.violations.join(', ')}）` });
       say('guardian', g.text);
       conv.turnsUsed++;
+      if (args.check && !conv.checks.includes(args.check as TellerCheck)) conv.checks.push(args.check as TellerCheck);
       await ok('お客さまに質問しました');
       return { result: { shown: true, replacedByGuard: !g.ok }, stop: true };
     }
@@ -241,6 +252,15 @@ async function execTool(
     }
     case 'end_conversation': {
       if (!conv.assessment) return reject('record_assessment first');
+      // Gate (held only): a calm cover story must not end the check early. Escalated or contact_required needs nothing more.
+      const t = await transfer();
+      if (t.status === 'held' && !conv.escalated && conv.checks.length < MIN_TELLER_CHECKS) {
+        const missing = TellerCheck.options.filter((c) => !conv.checks.includes(c));
+        if (conv.turnsUsed < deps.policy.guardian.max_turns) return reject(`teller_checks_incomplete: also ask about ${missing.join(', ')}`);
+        // Out of turns without coverage: only tighten, and only if something already looked off (≥1 elevated code).
+        const elevated = conv.assessment.reasonCodes.filter((c) => deps.policy.reason_codes[c]?.severity === 'elevated');
+        if (elevated.length) await escalate(deps, caller, conv, t, [...new Set<ReasonCode>(['coached_answers', ...elevated])], base);
+      }
       conv.status = 'closed';
       await ok('会話を終了しました');
       return { result: { closed: true }, stop: true };

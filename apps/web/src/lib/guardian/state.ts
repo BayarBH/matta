@@ -7,6 +7,11 @@ export type Message = z.infer<typeof Message>;
 
 export const Resource = z.enum(['police_9110', 'bank_official']);
 
+/** The four teller checks (SPEC §6 examples); counted by code to gate end_conversation on held transfers. */
+export const TellerCheck = z.enum(['purpose', 'payee_source', 'on_call', 'secrecy_or_script']);
+export type TellerCheck = z.infer<typeof TellerCheck>;
+export const MIN_TELLER_CHECKS = 3;
+
 /** `conversations/{transferId}`. `contentsJson` is the Gemini history (kept opaque: it carries thought signatures). */
 export const Conversation = z.object({
   transferId: z.string(),
@@ -19,6 +24,7 @@ export const Conversation = z.object({
   escalated: z.boolean(),
   failSafe: z.boolean(),
   resources: z.array(Resource).default([]),
+  checks: z.array(TellerCheck).default([]),
   contentsJson: z.string().default('[]'),
 });
 export type Conversation = z.infer<typeof Conversation>;

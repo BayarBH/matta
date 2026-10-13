@@ -84,6 +84,8 @@ class Api {
 
 const now = () => new Date().toISOString();
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+// Clock advances are exact, but real seconds also pass during a run (+1 h clock → ~60.5 min).
+const DELAY_TOLERANCE_MIN = 2;
 
 function setPath(obj: Record<string, unknown>, path: string, value: unknown) {
   const keys = path.split('.');
@@ -193,6 +195,7 @@ class Run {
       }
       case 'answer_guardian': {
         if (!this.state.transferId) return;
+        if (!(await this.stillChecked())) return this.emit('system', '振込の確認はすでに終わっているため、回答を省略しました');
         const { conversation: conv } = await this.api.web(
           `/api/guardian/${this.state.transferId}`,
           z.object({ conversation: ConversationView.nullable() }),
@@ -215,10 +218,10 @@ class Run {
         return;
       }
       case 'request_early_approval':
-        if (this.state.transferId) await this.api.bank('customer', `/v1/transfers/${this.state.transferId}/request-early-approval`, Transfer, {});
+        if (this.state.transferId && (await this.transfer()).status === 'held') await this.api.bank('customer', `/v1/transfers/${this.state.transferId}/request-early-approval`, Transfer, {});
         return this.emit('victim', '見守り人に早めの承認を依頼しました');
       case 'cancel':
-        if (this.state.transferId) await this.api.bank('customer', `/v1/transfers/${this.state.transferId}/cancel`, Transfer, {});
+        if (this.state.transferId && (await this.stillChecked())) await this.api.bank('customer', `/v1/transfers/${this.state.transferId}/cancel`, Transfer, {});
         await this.emit('victim', '振込を取り消しました');
         return this.fire('transfer_cancelled');
       case 'advance_clock':
@@ -230,6 +233,12 @@ class Run {
       case 'wait':
         return sleep(step.args.seconds * 1000);
     }
+  }
+
+  /** Transfer-bound victim steps are skipped once the transfer left held/contact_required (e.g. the contact decided). */
+  private async stillChecked() {
+    const st = (await this.transfer()).status;
+    return st === 'held' || st === 'contact_required';
   }
 
   private transfer() {
@@ -257,7 +266,7 @@ class Run {
     }
     if (exp.maxAddedDelayMin !== undefined && t) {
       const delay = t.settledAt ? (Date.parse(t.settledAt) - Date.parse(t.createdAt)) / 60_000 : Infinity;
-      checks.push({ name: 'maxAddedDelayMin', ok: delay <= exp.maxAddedDelayMin, detail: `${delay} min (sandbox clock)` });
+      checks.push({ name: 'maxAddedDelayMin', ok: delay <= exp.maxAddedDelayMin + DELAY_TOLERANCE_MIN, detail: `${delay} min (sandbox clock)` });
     }
     return { passed: checks.every((c) => c.ok), checks };
   }

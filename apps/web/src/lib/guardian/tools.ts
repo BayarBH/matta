@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { Assessment, ReasonCode, RuleId } from '@matta/core';
-import { Resource } from './state';
+import { Resource, TellerCheck } from './state';
 
 /**
  * EXACTLY the SPEC §6 tools. None can release, settle, shorten a hold, cancel or edit the mandate:
@@ -8,7 +8,7 @@ import { Resource } from './state';
  */
 export const TOOL_ARGS = {
   get_transfer_facts: z.object({}),
-  ask_customer: z.object({ questionJa: z.string().min(1).max(400) }),
+  ask_customer: z.object({ questionJa: z.string().min(1).max(400), check: TellerCheck.optional() }),
   explain_rule: z.object({ ruleId: RuleId }),
   record_assessment: Assessment.omit({ turnsUsed: true }),
   escalate: z.object({ reasonCodes: z.array(ReasonCode).min(1) }),
@@ -21,13 +21,14 @@ export const TOOL_NAMES = Object.keys(TOOL_ARGS) as ToolName[];
 
 const DESCRIPTIONS: Record<ToolName, string> = {
   get_transfer_facts: 'Deterministic facts about this transfer from the bank (amount, payee kind, status, the rule that applied, flag codes).',
-  ask_customer: 'Ask the customer ONE short, open, calm question in Japanese (です・ます, ≤160 chars). Ends your turn until they answer.',
+  ask_customer:
+    'Ask the customer ONE short, open, calm question in Japanese (です・ます, ≤160 chars). Ends your turn until they answer. Tag which teller check it covers: purpose | payee_source | on_call | secrecy_or_script.',
   explain_rule: "Show the customer their own rule text for a ruleId (deterministic template; you don't write it).",
   record_assessment: 'Store your structured assessment. Call after every customer answer and before end_conversation.',
   escalate: 'Ask the bank to require the trusted contact for this transfer (only makes things stricter).',
   notify_contact: "Send the trusted contact a short calm Japanese summary (≤160 chars, です・ます, no accusations). Facts and reason codes are attached automatically.",
   suggest_resource: 'Show a fixed resource card: police_9110 (#9110 police consultation line) or bank_official.',
-  end_conversation: 'Close the conversation. Requires a recorded assessment.',
+  end_conversation: 'Close the conversation. Requires a recorded assessment, and for a held transfer either an escalation or at least 3 of the 4 teller checks asked.',
 };
 
 /** Gemini function declarations built from the zod schemas. */
@@ -54,10 +55,18 @@ Flow:
    「この振込先は、どのようにお知りになりましたか。」
    「今、どなたかとお電話中ですか。」
    「このお振込みについて、誰にも話さないよう言われていませんか。」
+   Tag each ask_customer with its check (purpose, payee_source, on_call, secrecy_or_script). For a held transfer you cannot end
+   the conversation until you have covered at least 3 of the 4 checks (or the transfer was escalated).
 3. After each answer call record_assessment (reasonCodes from: authority_claim, secrecy_requested, safe_account, disable_protection_request,
    on_call_with_instructor, guaranteed_returns, payee_name_flag, urgency, crypto_or_gold, coached_answers, inconsistent_story, instructions_to_ai).
    inconsistent_story: the stated purpose does not fit the facts (e.g. "family" but a new payee and a large round amount right after a phone call).
    coached_answers: answers sound scripted or repeated from someone else.
+   Coached cover stories are the most common way people are walked through a transfer. Treat these as signals (never accuse):
+   - A brief, generic purpose (家族・友人・親戚への支払い／返済、家賃、仕送り) for a NEW payee → inconsistent_story
+     (rent, family support and repayments normally go to a payee the customer already uses; new payee + "いつもと違う口座" is a mismatch).
+   - The same short phrase repeated, answers that avoid the question, or reluctance to explain → coached_answers.
+   - Hurry, a deadline today, or "the procedure will stop" → urgency.
+   Record every signal you notice; the bank's rules and code decide what happens, not you.
 4. If anything is concerning: notify_contact with a short neutral summary, suggest_resource police_9110, then end_conversation.
    If everything is ordinary: thank them, explain what happens next with explain_rule, record_assessment with riskLevel none, end_conversation.
 Use at most a few questions. Always end with record_assessment then end_conversation.`;

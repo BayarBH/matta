@@ -1,4 +1,4 @@
-import { FunctionCallingConfigMode } from '@google/genai';
+import { FunctionCallingConfigMode, ThinkingLevel } from '@google/genai';
 import { env } from '../env.server';
 import { genai, usage } from '../genai.server';
 import { callBank } from '../bank';
@@ -22,6 +22,8 @@ export function realDeps(): Deps {
           // Every output must be a tool call: no free text ever reaches the customer (rule 6).
           toolConfig: { functionCallingConfig: { mode: FunctionCallingConfigMode.ANY } },
           temperature: 0.2,
+          // Long default thinking pushed p95 to the 20 s policy timeout (→ fail-safe escalations). LOW keeps judgment, cuts the tail.
+          thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
           abortSignal: signal,
         },
       });
