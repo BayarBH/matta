@@ -33,7 +33,7 @@ run gcloud builds submit . --project "$PROJECT" --region "$REGION" --config infr
   --substitutions="_DOCKERFILE=apps/demo-bank/Dockerfile,_IMAGE=${BANK_IMAGE}"
 run gcloud run deploy matta-bank --project "$PROJECT" --region "$REGION" --image "$BANK_IMAGE" \
   --service-account "$SA_BANK" --allow-unauthenticated --max-instances=3 \
-  --set-env-vars="^@^NODE_ENV=production@GOOGLE_CLOUD_PROJECT=${PROJECT}@FIRESTORE_DATABASE_ID=bank@BANK_URL=${BANK_URL}@WEB_URL=${WEB_URL}@S2S_ALLOWED_SA=${SA_WEB}@S2S_DEV_INSECURE=false@TASKS_MODE=cloud@TASKS_QUEUE=projects/${PROJECT}/locations/${REGION}/queues/hold-evaluation@TASKS_SA_EMAIL=${SA_BANK}@TASKS_ALLOWED_SA=${SA_BANK}@DEMO_MODE=true@POLICY_PATH=/app/policy/system-policy.yaml"
+  --set-env-vars="^;^NODE_ENV=production;GOOGLE_CLOUD_PROJECT=${PROJECT};FIRESTORE_DATABASE_ID=bank;BANK_URL=${BANK_URL};WEB_URL=${WEB_URL};S2S_ALLOWED_SA=${SA_WEB};S2S_DEV_INSECURE=false;TASKS_MODE=cloud;TASKS_QUEUE=projects/${PROJECT}/locations/${REGION}/queues/hold-evaluation;TASKS_SA_EMAIL=${SA_BANK};TASKS_ALLOWED_SA=${SA_BANK};DEMO_MODE=true;POLICY_PATH=/app/policy/system-policy.yaml"
 
 echo "== Web"
 WEB_IMAGE="${REPO}/web:${TAG}"
@@ -41,7 +41,7 @@ run gcloud builds submit . --project "$PROJECT" --region "$REGION" --config infr
   --substitutions="_DOCKERFILE=apps/web/Dockerfile,_IMAGE=${WEB_IMAGE},_NEXT_PUBLIC_FIREBASE_API_KEY=$(getv NEXT_PUBLIC_FIREBASE_API_KEY "$WEB_ENV_FILE"),_NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=$(getv NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN "$WEB_ENV_FILE"),_NEXT_PUBLIC_FIREBASE_PROJECT_ID=$(getv NEXT_PUBLIC_FIREBASE_PROJECT_ID "$WEB_ENV_FILE"),_NEXT_PUBLIC_FIREBASE_APP_ID=$(getv NEXT_PUBLIC_FIREBASE_APP_ID "$WEB_ENV_FILE"),_NEXT_PUBLIC_BANK_URL=${BANK_URL},_NEXT_PUBLIC_DEMO_MODE=true"
 run gcloud run deploy matta-web --project "$PROJECT" --region "$REGION" --image "$WEB_IMAGE" \
   --service-account "$SA_WEB" --allow-unauthenticated --max-instances=3 \
-  --set-env-vars="^@^NODE_ENV=production@GOOGLE_CLOUD_PROJECT=${PROJECT}@GOOGLE_CLOUD_LOCATION=global@MODEL_FAST=${MODEL_FAST}@MODEL_SMART=${MODEL_SMART}@FIRESTORE_DATABASE_ID=(default)@WEB_URL=${WEB_URL}@BANK_URL=${BANK_URL}@TASKS_MODE=cloud@S2S_DEV_INSECURE=false@DEMO_MODE=true"
+  --set-env-vars="^;^NODE_ENV=production;GOOGLE_CLOUD_PROJECT=${PROJECT};GOOGLE_CLOUD_LOCATION=global;MODEL_FAST=${MODEL_FAST};MODEL_SMART=${MODEL_SMART};FIRESTORE_DATABASE_ID=(default);WEB_URL=${WEB_URL};BANK_URL=${BANK_URL};TASKS_MODE=cloud;S2S_DEV_INSECURE=false;DEMO_MODE=true"
 
 echo "== URLs (share these; the legacy hash URLs from 'status.url' fail CORS because the bank allows WEB_URL only)"
 echo "web : ${WEB_URL}"

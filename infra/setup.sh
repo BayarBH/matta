@@ -59,7 +59,11 @@ run gcloud iam service-accounts add-iam-policy-binding "$SA_BANK" --project "$PR
   --member="serviceAccount:${SA_BANK}" --role=roles/iam.serviceAccountUser
 # Cloud Tasks service agent signs those OIDC tokens (automatic in new projects; explicit is harmless).
 # REST instead of `gcloud beta services identity create` (no beta component prompt).
-run curl -sfS -X POST -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "x-goog-user-project: ${PROJECT}"   "https://serviceusage.googleapis.com/v1beta1/projects/${PROJECT}/services/cloudtasks.googleapis.com:generateServiceIdentity" -o /dev/null
+# Not via run(): it would echo the access token.
+echo "+ POST serviceusage v1beta1 .../services/cloudtasks.googleapis.com:generateServiceIdentity"
+curl -sfS -X POST -d '{}' -H "Content-Type: application/json" -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+  -H "x-goog-user-project: ${PROJECT}" \
+  "https://serviceusage.googleapis.com/v1beta1/projects/${PROJECT}/services/cloudtasks.googleapis.com:generateServiceIdentity" -o /dev/null
 run gcloud iam service-accounts add-iam-policy-binding "$SA_BANK" --project "$PROJECT" --quiet --format=none \
   --member="serviceAccount:${TASKS_AGENT}" --role=roles/iam.serviceAccountTokenCreator
 
