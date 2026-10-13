@@ -5,6 +5,16 @@ import { log } from './log';
 
 const googleAuth = new GoogleAuth();
 
+/** Non-2xx from the bank; status and body are passed through to the browser as-is. */
+export class BankError extends Error {
+  constructor(
+    readonly status: number,
+    readonly body: unknown,
+  ) {
+    super(`bank -> ${status}`);
+  }
+}
+
 /** Google ID token for the bank (audience = BANK_URL), or none under the dev bypass. */
 async function serviceToken(): Promise<string | undefined> {
   const e = env();
@@ -32,7 +42,7 @@ export async function callBank(
   });
   if (!res.ok) {
     log('WARNING', 'bank call failed', { path, status: res.status });
-    throw new Error(`bank ${path} -> ${res.status}`);
+    throw new BankError(res.status, await res.json().catch(() => ({ error: 'bank_error' })));
   }
   return res.json();
 }
