@@ -1,0 +1,28 @@
+{
+  "name": "@matta/demo-bank",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --env-file-if-exists=.env.local src/server.ts",
+    "start": "tsx src/server.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit",
+    "test": "vitest run",
+    "build": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@matta/core": "workspace:^",
+    "express": "^5.3.0",
+    "firebase-admin": "^14.5.0",
+    "google-auth-library": "^11.3.0",
+    "tsx": "^4.23.15",
+    "zod": "^4.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/supertest": "^7.2.1",
+    "supertest": "^7.3.1",
+    "vitest": "^5.0.4"
+  }
+}
