@@ -19,7 +19,7 @@
 ## Phase 0A — Local skeleton (Day 0 night)
 ```text
 Read CLAUDE.md and docs/SPEC.md in full. We are in Phase 0A: local-first. No cloud deploy until Phase 0B.
-Goal: the skeleton runs on my machine against the real Google Cloud project (Gemini, Firebase Auth, Firestore databases `dev` and `bank-dev`), using the local substitutes in CLAUDE.md "Local-first development".
+Goal: the skeleton runs on my machine against the real Google Cloud project (Gemini, Firebase Auth, Firestore databases `web-dev` and `bank-dev`), using the local substitutes in CLAUDE.md "Local-first development".
 
 Tasks
 1. pnpm workspace: apps/web (Next.js App Router, TS strict, Tailwind), apps/demo-bank (Express), packages/core (zod schemas + empty mandate / evaluation / guard modules + vitest).

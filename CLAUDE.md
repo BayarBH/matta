@@ -29,7 +29,7 @@ Entry for the Zenn × Google Cloud "Agentic AI Hackathon" vol.5, whose theme is 
 
 ## Local-first development
 - Build and debug locally. Deploy the walking skeleton once (Phase 0B), then at the end of every day.
-- Locally, use the real Google Cloud project for Gemini (ADC via `gcloud auth application-default login`) and Firebase Auth, with separate Firestore databases `dev` (web) and `bank-dev` (bank) — or the emulator — so production data stays clean. Each service reads its database from `FIRESTORE_DATABASE_ID`.
+- Locally, use the real Google Cloud project for Gemini (ADC via `gcloud auth application-default login`) and Firebase Auth, with separate Firestore databases `web-dev` (web) and `bank-dev` (bank) — or the emulator — so production data stays clean. Each service reads its database from `FIRESTORE_DATABASE_ID`.
 - Local substitutes, switched by env: `TASKS_MODE=inline` (evaluate holds in-process instead of Cloud Tasks), `S2S_DEV_INSECURE=true` (skip Google ID-token checks between services; refused when `NODE_ENV=production`), `DEMO_MODE=true` (demo clock, sandbox reset, red-team console).
 - Cloud-only checks — must pass on Cloud Run, never assume them from local runs: web→bank Google ID tokens, Cloud Tasks OIDC delivery, runtime env and secrets, CORS from the contact's browser to the bank, login on the public URL, IAM separation of the `bank` database.
 
