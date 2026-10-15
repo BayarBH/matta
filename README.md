@@ -6,7 +6,7 @@
 **架空のデモです。実在の銀行・警察とは関係ありません。** 登場する銀行「デモ銀行（架空）」、警察「青嶺県警察（架空）」、人物はすべて架空です。
 
 - デモURL: https://matta-web-760253059957.asia-east1.run.app
-- デモ動画（約3分）: 〔YouTube URL〕
+- デモ動画（約3分）: https://youtu.be/9kjsRjmtWVY
 - 審査用テストアカウント: 応募フォームの「動作確認の方法」に記載しています（このREADMEには載せていません）。
 - 評価結果: [`docs/EVAL.md`](docs/EVAL.md)／設計判断の記録: [`docs/DECISIONS.md`](docs/DECISIONS.md)
 
