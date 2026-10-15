@@ -122,7 +122,7 @@ docs/              SPEC、DECISIONS、EVAL、DEMO_SCRIPT、SUBMISSION、architec
 | 正当な振込の誤エスカレーション率 | **0%** |
 | 1件あたり推定コスト／ガーディアン応答時間 p50・p95 | 約 ¥0.8／1.8秒・10.0秒 |
 
-単体テスト：packages/core 87件、demo-bank 38件（認可・なりすまし27件を含む）、web 21件（フェイルセーフ・ガバナンスの静的検査を含む）。
+単体テスト：packages/core 87件、demo-bank 38件（認可・なりすまし27件を含む）、web 22件（フェイルセーフ・ガバナンスの静的検査を含む）。
 
 ## 制限事項
 

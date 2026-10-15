@@ -31,6 +31,7 @@ export type Deps = {
 export type Caller = { uid: string; sandboxId: string; token: string };
 
 const MAX_MODEL_CALLS_PER_STEP = 8;
+const RATE_LIMIT_BACKOFF_MS = 1500;
 const BREAKER_WINDOW = 20;
 // ponytail: min sample 5 so one early failure doesn't pause everything; half-open probe after 5 min.
 const BREAKER_MIN_SAMPLE = 5;
@@ -107,10 +108,12 @@ export async function runStep(deps: Deps, caller: Caller, transferId: string, cu
         try {
           reply = await call();
         } catch (e) {
-          // One retry on a timeout only (rare long-tail latency); the error still counts for the breaker. Still fails safe after.
-          if (!/abort|timeout/i.test(String(e))) throw e;
+          // One retry on a timeout or a transient 429 (shared Vertex quota); the error still counts for the breaker. Still fails safe after.
+          const rateLimited = /\b429\b|RESOURCE_EXHAUSTED/i.test(String(e));
+          if (!rateLimited && !/abort|timeout/i.test(String(e))) throw e;
           await recordCall(deps, true, breaker, probing);
-          await deps.audit({ ...base, actor: 'guardian', action: 'guardian.model_call', model: deps.modelName, latencyMs: Date.now() - started, outcome: 'error', detailsJa: 'AIの応答が時間内になかったため、1回だけ再試行します' });
+          await deps.audit({ ...base, actor: 'guardian', action: 'guardian.model_call', model: deps.modelName, latencyMs: Date.now() - started, outcome: 'error', detailsJa: rateLimited ? 'AIが混み合っているため、少し待って1回だけ再試行します' : 'AIの応答が時間内になかったため、1回だけ再試行します' });
+          if (rateLimited) await new Promise((r) => setTimeout(r, RATE_LIMIT_BACKOFF_MS));
           reply = await call();
         }
       } catch (e) {

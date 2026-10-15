@@ -190,6 +190,12 @@ describe('guardian governance', () => {
     expect(h.calls.some((c) => c.path.endsWith('/escalate'))).toBe(false);
   });
 
+  it('a single 429 is retried once instead of failing safe', async () => {
+    const h = harness([new Error('ApiError: {"error":{"code":429,"status":"RESOURCE_EXHAUSTED"}}'), [fc('get_transfer_facts'), askC('purpose')]]);
+    const conv = await runStep(h.deps, h.caller, 't1');
+    expect(conv.failSafe).toBe(false);
+  });
+
   it('ask_customer check tag is validated', async () => {
     const h = harness([[fc('ask_customer', { questionJa: 'ご用途を教えていただけますか。', check: 'release' })], [askC('purpose')]]);
     const conv = await runStep(h.deps, h.caller, 't1');
