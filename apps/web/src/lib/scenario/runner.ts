@@ -286,9 +286,9 @@ class Run {
 }
 
 /** Starts a run. With the victim autopilot on, runs to completion within the request (≤ a few minutes). */
-export async function startRun(scenario: Scenario, sandboxId: string, opts: { autopilotVictim: boolean; autopilotContact: boolean }) {
+export async function startRun(scenario: Scenario, sandboxId: string, opts: { autopilotVictim: boolean; autopilotContact: boolean }, id: string = randomUUID()) {
   const state: ScenarioRun = {
-    id: randomUUID(),
+    id,
     sandboxId,
     scenarioId: scenario.id,
     ...opts,

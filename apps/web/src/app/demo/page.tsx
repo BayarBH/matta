@@ -42,7 +42,8 @@ export default function DemoPage() {
         const r = await webFetch(`/api/demo/runs/${runId}`, {}, Run);
         if (alive) setRun(r);
       } catch (e) {
-        if (alive && e instanceof ApiError && e.status === 404) setMsg('シナリオ実行の記録が見つかりません。');
+        // 404 right after start: the run record is not written yet; keep polling.
+        void e;
       }
     };
     void poll();
@@ -59,13 +60,14 @@ export default function DemoPage() {
   async function start() {
     setMsg('シナリオを開始しています…');
     setRun(null);
+    const id = crypto.randomUUID();
+    setRunId(id); // poll while the autopilot runs (the POST returns only when it finishes)
     try {
-      const r = await webFetch(
+      await webFetch(
         `/api/demo/scenarios/${scenario}/run`,
-        post({ sandboxId: sid, autopilotVictim: victimAuto, autopilotContact: contactAuto }),
+        post({ sandboxId: sid, autopilotVictim: victimAuto, autopilotContact: contactAuto, runId: id }),
         z.object({ runId: z.string() }),
       );
-      setRunId(r.runId);
       setMsg(null);
     } catch (e) {
       setMsg(e instanceof ApiError && e.status === 404 ? 'シナリオ実行機能はまだ準備中です。' : errorJa(e));
